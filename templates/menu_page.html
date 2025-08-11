@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_menu.title if current_menu else 'Menu' }} - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+    {% if current_menu %}
+        <div class="menu-header">
+            <h2>{{ current_menu.title }}</h2>
+            <p class="menu-description">{{ current_menu.description }}</p>
+        </div>
+        
+        {% if menu_id == 'ballades' %}
+            <!-- Page des ballades avec les visites existantes -->
+            <div class="visites-section">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h3>
+                            {{ current_menu.page_title if current_menu and current_menu.page_title else 'Mes Promenades' }}
+                        </h3>
+                        <p class="intro">
+                            {{ current_menu.page_description if current_menu and current_menu.page_description else 'Découvrez Paris à travers mes promenades aquarelles. Chaque visite vous emmène dans un quartier unique avec ses histoires et ses secrets.' }}
+                        </p>
+                    </div>
+                    
+                    {% if session.admin_logged_in %}
+                        <div class="page-actions">
+                            <a href="{{ url_for('admin_new_visite_page') }}" class="btn-add-page">
+                                ➕ Ajouter une balade
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if visites %}
+                    <div class="visites-grid">
+                        {% for visite in visites %}
+                            <div class="visite-card">
+                                <div class="visite-image">
+                                    {% if visite.image_url %}
+                                        {% if visite.image_url.startswith('http') %}
+                                            <img src="{{ visite.image_url }}" alt="{{ visite.titre }}" loading="lazy">
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename=visite.image_url) }}" alt="{{ visite.titre }}" loading="lazy">
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="no-image">📷</div>
+                                    {% endif %}
+                                </div>
+                                <div class="visite-content">
+                                    <h3>{{ visite.titre }}</h3>
+                                    <p class="visite-description">{{ visite.description_courte }}</p>
+                                                            <div class="visite-meta">
+                            <span class="etapes-count">{{ visite.etapes|length }} étapes</span>
+                            <span class="date">{{ visite.date_creation[:10] }}</span>
+                        </div>
+                        <a href="{{ url_for('visite_detail', slug=visite.slug) }}" class="btn btn-visite">Voir la visite</a>
+                        
+                        {% if session.admin_logged_in %}
+                            <div class="card-admin-actions">
+                                <a href="{{ url_for('admin_edit_visite_page', visite_id=visite.id) }}" class="btn btn-small btn-edit" title="Modifier">
+                                    ✏️
+                                </a>
+                                <a href="{{ url_for('admin_delete_visite', visite_id=visite.id) }}" class="btn btn-small btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette visite ?')">
+                                    🗑️
+                                </a>
+                            </div>
+                        {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-visites">
+                        <p>Aucune promenade disponible pour le moment.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+        {% elif menu_id == 'cultures' %}
+            <!-- Page des carnets de cultures -->
+            <div class="cultures-section">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h3>
+                            {{ current_menu.page_title if current_menu and current_menu.page_title else 'Carnets de Cultures' }}
+                        </h3>
+                        <p class="intro">
+                            {{ current_menu.page_description if current_menu and current_menu.page_description else 'Découvrez mes explorations culturelles et artistiques. Chaque carnet vous emmène dans un univers unique avec ses histoires et ses secrets.' }}
+                        </p>
+                    </div>
+                    
+                    {% if session.admin_logged_in %}
+                        <div class="page-actions">
+                            <a href="{{ url_for('admin_new_category_page', menu_id='cultures') }}" class="btn-add-page">
+                                ➕ Ajouter une catégorie
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Sélection de catégorie -->
+                <div class="categories-selection">
+                    <h3>Choisissez une catégorie :</h3>
+                    <div class="categories-grid">
+                        {% for category_id, category in categories.cultures.items() %}
+                            <div class="category-card-container">
+                                <a href="{{ url_for('carnets_culture_categorie', categorie=category_id) }}" class="category-card">
+                                    <div class="category-icon">{{ category.icon }}</div>
+                                    <h4>{{ category.nom }}</h4>
+                                    <p>{{ category.description }}</p>
+                                    <span class="carnet-count">{{ carnets_culture[category_id]|length if carnets_culture and category_id in carnets_culture else 0 }} carnets</span>
+                                </a>
+                                {% if session.admin_logged_in %}
+                                    <div class="category-admin-actions">
+                                        <a href="{{ url_for('admin_edit_category_page', menu_id='cultures', category_id=category_id) }}" class="btn btn-small btn-edit" title="Modifier">
+                                            ✏️
+                                        </a>
+                                        <a href="{{ url_for('admin_delete_category', menu_id='cultures', category_id=category_id) }}" class="btn btn-small btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
+                                            🗑️
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+        {% elif menu_id == 'sante' %}
+            <!-- Page des carnets de santé naturelle -->
+            <div class="cultures-section">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h3>
+                            {{ current_menu.page_title if current_menu and current_menu.page_title else 'Carnets de Santé Naturelle' }}
+                            {% if session.admin_logged_in %}
+                                <a href="{{ url_for('admin_edit_menu_page', menu_id='sante') }}" class="edit-icon" title="Modifier le titre de la page">
+                                    ✏️
+                                </a>
+                            {% endif %}
+                        </h3>
+                        <p class="intro">
+                            {{ current_menu.page_description if current_menu and current_menu.page_description else 'Découvrez mes conseils de bien-être et médecines douces. Chaque carnet vous guide vers une vie plus saine et équilibrée.' }}
+                            {% if session.admin_logged_in %}
+                                <a href="{{ url_for('admin_edit_menu_page', menu_id='sante') }}" class="edit-icon" title="Modifier la description de la page">
+                                    ✏️
+                                </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    {% if session.admin_logged_in %}
+                        <div class="page-actions">
+                            <a href="{{ url_for('admin_new_category_page', menu_id='sante') }}" class="btn-add-page">
+                                ➕ Ajouter une catégorie
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Sélection de catégorie -->
+                <div class="categories-selection">
+                    <h3>Choisissez une catégorie :</h3>
+                    <div class="categories-grid">
+                        {% for category_id, category in categories.sante.items() %}
+                            <div class="category-card-container">
+                                <a href="{{ url_for('carnets_categorie', menu_id='sante', categorie=category_id) }}" class="category-card">
+                                    <div class="category-icon">{{ category.icon }}</div>
+                                    <h4>{{ category.nom }}</h4>
+                                    <p>{{ category.description }}</p>
+                                    <span class="carnet-count">0 carnets</span>
+                                </a>
+                                {% if session.admin_logged_in %}
+                                    <div class="category-admin-actions">
+                                        <a href="{{ url_for('admin_edit_category_page', menu_id='sante', category_id=category_id) }}" class="btn btn-small btn-edit" title="Modifier">
+                                            ✏️
+                                        </a>
+                                        <a href="{{ url_for('admin_delete_category', menu_id='sante', category_id=category_id) }}" class="btn btn-small btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
+                                            🗑️
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+        {% elif menu_id == 'jardin' %}
+            <!-- Page des carnets de jardin -->
+            <div class="cultures-section">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h3>
+                            {{ current_menu.page_title if current_menu and current_menu.page_title else 'Carnets de Jardin' }}
+                        </h3>
+                        <p class="intro">
+                            {{ current_menu.page_description if current_menu and current_menu.page_description else 'Découvrez mes conseils de jardinage et botanique. Chaque carnet vous guide dans l\'art du jardinage et la découverte des plantes.' }}
+                        </p>
+                    </div>
+                    
+                    {% if session.admin_logged_in %}
+                        <div class="page-actions">
+                            <a href="{{ url_for('admin_new_category_page', menu_id='jardin') }}" class="btn-add-page">
+                                ➕ Ajouter une catégorie
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Sélection de catégorie -->
+                <div class="categories-selection">
+                    <h3>Choisissez une catégorie :</h3>
+                    <div class="categories-grid">
+                        {% for category_id, category in categories.jardin.items() %}
+                            <div class="category-card-container">
+                                <a href="{{ url_for('carnets_categorie', menu_id='jardin', categorie=category_id) }}" class="category-card">
+                                    <div class="category-icon">{{ category.icon }}</div>
+                                    <h4>{{ category.nom }}</h4>
+                                    <p>{{ category.description }}</p>
+                                    <span class="carnet-count">0 carnets</span>
+                                </a>
+                                {% if session.admin_logged_in %}
+                                    <div class="category-admin-actions">
+                                        <a href="{{ url_for('admin_edit_category_page', menu_id='jardin', category_id=category_id) }}" class="btn btn-small btn-edit" title="Modifier">
+                                            ✏️
+                                        </a>
+                                        <a href="{{ url_for('admin_delete_category', menu_id='jardin', category_id=category_id) }}" class="btn btn-small btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
+                                            🗑️
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+        {% elif menu_id == 'carnet_organisation' %}
+            <!-- Page des carnets d'organisation -->
+            <div class="cultures-section">
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h3>
+                            {{ current_menu.page_title if current_menu and current_menu.page_title else 'Carnet d\'Organisation' }}
+                        </h3>
+                        <p class="intro">
+                            {{ current_menu.page_description if current_menu and current_menu.page_description else 'Outils, listes et supports pour une organisation personnelle et professionnelle optimale.' }}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Affichage des catégories d'organisation -->
+                <div class="categories-selection">
+                    <h3>Choisissez une catégorie :</h3>
+                    <div class="categories-grid">
+                        {% if categories_organisation and categories_organisation.carnet_organisation %}
+                            {% for category_id, category in categories_organisation.carnet_organisation.items() %}
+                                {% if category.active %}
+                                    <div class="category-card-container">
+                                        <a href="{{ url_for('carnets_organisation_categorie', category_id=category_id) }}" class="category-card">
+                                            <div class="category-icon">{{ category.icon }}</div>
+                                            <h4>{{ category.name }}</h4>
+                                            <p>{{ category.description }}</p>
+                                            <span class="carnet-count">
+                                                {% if carnets_organisation and carnets_organisation[category_id] %}
+                                                    {{ carnets_organisation[category_id]|length }} 
+                                                    {% if carnets_organisation[category_id]|length == 1 %}carnet{% else %}carnets{% endif %}
+                                                {% else %}
+                                                    0 carnets
+                                                {% endif %}
+                                            </span>
+                                        </a>
+                                        {% if session.admin_logged_in %}
+                                            <div class="category-admin-actions">
+                                                <a href="{{ url_for('admin_edit_category_organisation_page', category_id=category_id) }}" class="btn btn-small btn-edit" title="Modifier">
+                                                    ✏️
+                                                </a>
+                                                <a href="{{ url_for('admin_delete_category_organisation', category_id=category_id) }}" class="btn btn-small btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
+                                                    🗑️
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-categories">
+                                <p>Aucune catégorie d'organisation disponible.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+        {% endif %}
+        
+    {% else %}
+        <div class="error-page">
+            <h2>Page non trouvée</h2>
+            <p>Le menu demandé n'existe pas.</p>
+            <a href="{{ url_for('menu_page', menu_id='ballades') }}" class="btn">Retour aux ballades</a>
+        </div>
+    {% endif %}
+{% endblock %} 

@@ -1,0 +1,95 @@
+{
+  "cultures": {
+    "theatre_spectacles": {
+      "id": "theatre_spectacles",
+      "nom": "Théâtre & Spectacles",
+      "description": "Critiques et recommandations",
+      "icon": "🎭",
+      "ordre": 2
+    },
+    "litterature": {
+      "id": "litterature",
+      "nom": "Littérature",
+      "description": "Coups de cœur et découvertes",
+      "icon": "📚",
+      "ordre": 3
+    },
+    "musees_expositions": {
+      "id": "musees_expositions",
+      "nom": "Musées & Expositions",
+      "description": "Musée et expositions sympa",
+      "icon": "🏛",
+      "ordre": 3,
+      "titre": "Musées & Expositions"
+    }
+  },
+  "sante": {
+    "plantes_medicinales": {
+      "id": "plantes_medicinales",
+      "nom": "Plantes Médicinales",
+      "description": "Propriétés et utilisations",
+      "icon": "🌱",
+      "ordre": 1
+    },
+    "bien_etre": {
+      "id": "bien_etre",
+      "nom": "Bien-être",
+      "description": "Techniques de relaxation",
+      "icon": "🧘",
+      "ordre": 2
+    },
+    "nutrition": {
+      "id": "nutrition",
+      "nom": "Nutrition",
+      "description": "Alimentation saine",
+      "icon": "🥗",
+      "ordre": 3
+    }
+  },
+  "jardin": {
+    "jardinage": {
+      "id": "jardinage",
+      "nom": "Jardinage",
+      "description": "Conseils et astuces",
+      "icon": "🌱",
+      "ordre": 1
+    },
+    "botanique": {
+      "id": "botanique",
+      "nom": "Botanique",
+      "description": "Découverte des plantes",
+      "icon": "🌸",
+      "ordre": 2
+    },
+    "entretien": {
+      "id": "entretien",
+      "nom": "Entretien",
+      "description": "Soins et maintenance",
+      "icon": "🌿",
+      "ordre": 3
+    }
+  },
+  "organisation": {
+    "planification": {
+      "id": "planification",
+      "nom": "Planification",
+      "description": "Organisation et planning",
+      "icon": "📅",
+      "ordre": 1
+    },
+    "productivite": {
+      "id": "productivite",
+      "nom": "Productivité",
+      "description": "Astuces et méthodes",
+      "icon": "⚡",
+      "ordre": 2
+    },
+    "minimalisme": {
+      "id": "minimalisme",
+      "nom": "Minimalisme",
+      "description": "Simplification de vie",
+      "icon": "🧹",
+      "ordre": 3
+    }
+  }
+}

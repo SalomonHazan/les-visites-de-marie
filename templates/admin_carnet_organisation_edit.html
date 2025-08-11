@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier le Carnet d'Organisation - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h1>Modifier le Carnet d'Organisation</h1>
+        <p class="category-info">{{ category.icon }} {{ category.name }}</p>
+        <p class="category-description">{{ category.description }}</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_update_carnet_organisation', category_id=category_id, carnet_id=carnet_id) }}" enctype="multipart/form-data" class="admin-form">
+        <div class="form-group">
+            <label for="title">Titre du carnet *</label>
+            <input type="text" id="title" name="title" value="{{ carnet.title }}" required class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4" class="form-control" placeholder="Décrivez le contenu de ce carnet d'organisation...">{{ carnet.description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="image">Image (optionnel)</label>
+            {% if carnet.image_url %}
+                <div class="current-image">
+                    <p>Image actuelle :</p>
+                    {% if carnet.image_url.startswith('http') %}
+                        <img src="{{ carnet.image_url }}" alt="Image actuelle" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=carnet.image_url) }}" alt="Image actuelle" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                    {% endif %}
+                </div>
+            {% endif %}
+            <input type="file" id="image" name="image" accept="image/*" class="form-control">
+            <small class="form-text">Formats acceptés : PNG, JPG, JPEG, GIF, WEBP. Taille max : 10MB. Laissez vide pour conserver l'image actuelle.</small>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('carnets_organisation_categorie', category_id=category_id) }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.admin-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-form-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.admin-form-header h1 {
+    color: #2c3e50;
+    margin: 0 0 15px 0;
+    font-size: 2.2em;
+}
+
+.category-info {
+    font-size: 1.3em;
+    color: #3498db;
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
+.category-description {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.admin-form {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1.1em;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.current-image {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.current-image p {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.form-text {
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ecf0f1;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #229954;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .admin-form-container {
+        padding: 15px;
+    }
+    
+    .admin-form {
+        padding: 20px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+
+
+

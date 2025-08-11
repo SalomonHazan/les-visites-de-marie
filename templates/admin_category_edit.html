@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Modifier {{ category.nom }} - {{ config.site_title }}{% endblock %}
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h2>✏️ Modifier la Catégorie</h2>
+        <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="btn btn-secondary">← Retour au menu</a>
+    </div>
+    
+    <form method="POST" action="{{ url_for('admin_update_category', menu_id=menu_id, category_id=category_id) }}" class="admin-form">
+        <div class="form-section">
+            <h3>Informations de la catégorie</h3>
+            
+            <div class="form-group">
+                <label for="nom">Nom de la catégorie *</label>
+                <input type="text" id="nom" name="nom" value="{{ category.nom }}" required>
+                <small>Le nom qui sera affiché sur la carte de catégorie</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" rows="3" required>{{ category.description }}</textarea>
+                <small>Une brève description de la catégorie</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="icon">Icône</label>
+                <input type="text" id="icon" name="icon" value="{{ category.icon }}" maxlength="2">
+                <small>Une icône emoji pour représenter la catégorie (ex: 🏛️, 🎭, 📚)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="category_id">Identifiant technique</label>
+                <input type="text" id="category_id" value="{{ category.id }}" disabled>
+                <small>L'identifiant technique ne peut pas être modifié</small>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Modifier la catégorie</button>
+            <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

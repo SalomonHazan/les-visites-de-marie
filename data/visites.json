@@ -1,0 +1,133 @@
+[
+  {
+    "id": "c93bcdc5-e704-422f-bc5a-2e02bcd16628",
+    "titre": "Plongée mystique au Musée d'Art et de Culture Soufi MTO",
+    "slug": "plong-e-mystique-au-mus-e-d-art-et-de-culture-soufi-mto",
+    "description_courte": "Franchement, je ne m'attendais pas à ça. Niché dans un coin discret, le musée MTO m'a offert une vra...",
+    "description_complete": "Franchement, je ne m'attendais pas à ça. Niché dans un coin discret, le musée MTO m'a offert une vraie parenthèse hors du temps. Dès l'entrée, l'ambiance change : lumière tamisée, sons doux, et cette odeur d'encens qui t'enveloppe.\r\n\r\nCe n'est pas un musée classique. Ici, chaque œuvre parle d'amour, d'unité, de quête intérieure. Calligraphies, installations interactives, vidéos, objets anciens… tout est pensé pour te faire ressentir, pas juste regarder.\r\n\r\nLe plus marquant ? Une tunique sculptée en papier, inspirée d'un poème soufi — d'une finesse incroyable. Et cette salle immersive où tu es littéralement plongé dans la poésie persane, avec des projections tout autour de toi. Hypnotique.\r\n\r\nEn sortant, t'as juste envie de ralentir. De respirer. Et peut-être même de méditer un peu.",
+    "etapes": [
+      {
+        "titre": "Le Jardin des Réflexions",
+        "description": "Avant même d'entrer, le ton est donné. Le jardin, inspiré des symboles soufis, invite à la contemplation. Entre fontaines, pierres gravées et chemins en spirale, tu poses inconsciemment ton téléphone et tu ralentis. C'est calme, beau, presque méditatif.",
+        "duree": "20 min",
+        "adresse": "6, avenue des Tilleuls – 78400 Chatou",
+        "metro": "Chatou"
+      },
+      {
+        "titre": "L'Accueil & l'Introduction au Soufisme",
+        "description": "Une première salle te plonge dans l'essentiel : qu'est-ce que le soufisme ? Pourquoi l'art est-il au cœur de cette voie spirituelle ? L'approche est pédagogique mais jamais lourde. On te parle d'amour, d'unité, d'introspection. Tu sens que ce n'est pas un musée neutre — c'est un lieu habité.",
+        "duree": "10 min",
+        "adresse": "6, avenue des Tilleuls – 78400 Chatou",
+        "metro": "Chatou"
+      },
+      {
+        "titre": "Les Œuvres Mystiques",
+        "description": "Ici, chaque pièce a une âme. Des calligraphies aux installations modernes, tout parle de cheminement intérieur. Tu passes d'objets anciens à des œuvres numériques sans rupture. Mention spéciale à la tunique en papier sculpté, porteuse d'un poème soufi – visuellement sublime et symboliquement puissant.",
+        "duree": "30 min",
+        "adresse": "6, avenue des Tilleuls – 78400 Chatou",
+        "metro": "Chatou"
+      },
+      {
+        "titre": "L'Espace Immersif",
+        "description": "C'est LA claque sensorielle. Une salle où tu es cerné par des projections de vers poétiques, de paysages célestes et de symboles soufis. Le son, la lumière, le rythme… tout t'absorbe. Tu n'es plus en train de visiter, tu vis une expérience.",
+        "duree": "20 min",
+        "adresse": "6, avenue des Tilleuls – 78400 Chatou",
+        "metro": "Chatou"
+      },
+      {
+        "titre": "La Salle de Silence & Retour au Jardin",
+        "description": "uste avant de sortir, un espace épuré t'invite à t'asseoir. Rien à lire, rien à regarder. Juste respirer. Puis tu repasses par le jardin, mais différemment. T'as l'impression que quelque chose a bougé à l'intérieur. Et c'est peut-être ça, le vrai but du lieu.",
+        "duree": "20 min",
+        "adresse": "6, avenue des Tilleuls – 78400 Chatou",
+        "metro": "Chatou"
+      }
+    ],
+    "conseils": [
+      "Prends ton temps dès le jardin. Ce n'est pas juste une entrée, c'est une mise en condition. Arrive un peu en avance, déconnecte-toi du téléphone, marche lentement. C'est une transition douce entre le monde extérieur et l'univers soufi.",
+      "Utilise l'audioguide (ou pose des questions) : Certains symboles ou œuvres peuvent paraître abstraits si on ne connaît pas le soufisme. L'audioguide (s'il est dispo) ou simplement échanger avec l'équipe sur place apporte un éclairage précieux — sans casser la magie",
+      "Évite les horaires de pointe. Le lieu est plus fort quand il est silencieux. Si tu peux, vise une visite en semaine ou tôt le matin. Tu profiteras mieux des espaces immersifs et de la salle de silence… qui porte bien son nom."
+    ],
+    "image_url": "https://www.yvelines-infos.fr/content/uploads/2024/54070349052-aee5456f56-k.jpg",
+    "transport": {
+      "adresse": "123 Avenue des Champs-Élysées, 75008 Paris",
+      "metro": "Champs-Élysées - Clemenceau (lignes 1 et 13)"
+    },
+    "date_creation": "2025-08-04T22:40:16.873473"
+  },
+  {
+    "id": "0aa1c5a5-e573-40e4-8f9d-6051ee1b27d2",
+    "titre": "Balade inspirante dans le Marais",
+    "slug": "balade-inspirante-dans-le-marais",
+    "description_courte": "Le Marais, c'est ce genre de quartier qui te donne envie de ralentir, lever les yeux, et te perdre v...",
+    "description_complete": "Le Marais, c'est ce genre de quartier qui te donne envie de ralentir, lever les yeux, et te perdre volontairement. Entre ruelles pavées, hôtels particuliers, galeries, librairies et bonnes odeurs de falafels, c'est une promenade qui a du charme, du fond et des surprises à chaque coin de rue",
+    "etapes": [
+      {
+        "titre": " Place des Vosges",
+        "description": "Impossible de commencer ailleurs. Calme, symétrique, élégante. Assieds-toi sous les arcades ou sur un banc au centre. Victor Hugo y a vécu, toi tu t'y reconnectes à l'instant présent.",
+        "duree": "20 min",
+        "adresse": "Place des Vosges, 75004 Paris",
+        "metro": "Place des voges"
+      },
+      {
+        "titre": "Rue des Francs-Bourgeois",
+        "description": "Un enchaînement de façades historiques et de boutiques modernes. Parfait pour flâner, sans but. Entre deux vitrines, une cour cachée. Entre deux pas, un parfum de café.",
+        "duree": "20 min",
+        "adresse": "Rue des Francs-Bourgeois, 75004 Paris",
+        "metro": "Saint-Paul"
+      },
+      {
+        "titre": "Musée Carnavalet (gratuit)",
+        "description": "Petit détour culturel. Dédié à l'histoire de Paris, il vaut le coup d'œil rien que pour ses décors intérieurs et son atmosphère hors du temps. Bonus : c'est gratuit.",
+        "duree": "60 min",
+        "adresse": "23 Rue de Sévigné, 75003 Paris",
+        "metro": "Saint-Paul"
+      },
+      {
+        "titre": "Rue des Rosiers",
+        "description": "Le cœur battant du quartier juif. Falafels, pâtisseries orientales, librairies hébraïques. Une rue qui a une âme — et une odeur de pain chaud. \r\n\r\nParfaite pour une pause.\r\n",
+        "duree": "45 min",
+        "adresse": "Rue des Rosiers, 75004 Paris",
+        "metro": "Saint-Paul"
+      },
+      {
+        "titre": "Jardin Anne-Frank",
+        "description": "Un petit havre secret derrière un portail discret. Peu de touristes. Juste du calme, un mur végétal, quelques bancs… idéal pour terminer la balade en douceur.",
+        "duree": "15 min",
+        "adresse": "14 Impasse Berthaud, 75003 Paris",
+        "metro": "Saint-Paul"
+      }
+    ],
+    "conseils": [
+      "Viens à pied et sans plan : Le Marais, ça se découvre au hasard. Laisse ton GPS de côté, perds-toi. C'est comme ça qu'on tombe sur les plus belles cours intérieures ou une galerie inattendue.",
+      "Fais des pauses régulières : Un café rue Vieille-du-Temple, un banc sur la place Sainte-Catherine, un petit musée… Ici, chaque arrêt est une respiration.",
+      "Regarde les détails : Sculptures au-dessus des portes, inscriptions anciennes, devantures d'époque… Le charme du Marais est dans le détail, pas dans les grands monuments."
+    ],
+    "image_url": "uploads/visites/Le-Marais-Paris-Tourist-Information_5b3b4a0c.webp",
+    "transport": {
+      "adresse": "Place des Vosges, 75004 Paris",
+      "metro": "Saint-Paul (ligne 1) ou Chemin Vert (ligne 8)"
+    },
+    "date_creation": "2025-08-05T11:03:10.631332"
+  },
+  {
+    "id": "1e3e230f-144f-4121-9000-7da3b3746494",
+    "titre": "Etretats",
+    "slug": "etretats",
+    "description_courte": "Sympa",
+    "description_complete": "Sympa",
+    "etapes": [
+      {
+        "titre": "Tu prend le train ici",
+        "description": "Le train je sais pas ou",
+        "duree": "75 min",
+        "adresse": "",
+        "metro": ""
+      }
+    ],
+    "conseils": [
+      "Prend une casquette"
+    ],
+    "image_url": "uploads/visites/chagall-2_4cbfdfdc.jpg",
+    "date_creation": "2025-08-07T20:26:25.761932"
+  }
+]

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier la page - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h2>✏️ Modifier la page "{{ menu.title }}"</h2>
+        <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="btn btn-secondary">← Retour à la page</a>
+    </div>
+    
+    <form method="POST" action="{{ url_for('admin_update_menu_page', menu_id=menu_id) }}" class="admin-form">
+        <div class="form-section">
+            <h3>Informations de la page</h3>
+            
+            <div class="form-group">
+                <label for="page_title">Titre de la page *</label>
+                <input type="text" id="page_title" name="page_title" value="{{ menu.page_title if menu.page_title else menu.title }}" required>
+                <small>Le titre qui sera affiché en haut de la page</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="page_description">Description de la page *</label>
+                <textarea id="page_description" name="page_description" rows="4" required>{{ menu.page_description if menu.page_description else '' }}</textarea>
+                <small>La description qui sera affichée sous le titre</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Nom technique du menu</label>
+                <input type="text" value="{{ menu.id }}" disabled>
+                <small>Le nom technique du menu ne peut pas être modifié ici</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Statut du menu</label>
+                <input type="text" value="{{ 'Actif' if menu.active else 'Inactif' }}" disabled>
+                <small>Le statut du menu ne peut pas être modifié ici</small>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Modifier cette page</button>
+            <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

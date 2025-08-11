@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}{{ carnet.title }} - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="carnet-organisation-detail-container">
+    <div class="carnet-organisation-detail-header">
+        <div class="carnet-organisation-detail-info">
+            <div class="carnet-organisation-detail-icon">{{ category.icon }}</div>
+            <div class="carnet-organisation-detail-text">
+                <h1>{{ carnet.title }}</h1>
+                <p class="carnet-organisation-detail-description">{{ carnet.description }}</p>
+                <div class="carnet-organisation-detail-meta">
+                    <span class="category-name">{{ category.name }}</span>
+                    <span class="date">{{ carnet.date_created[:10] }}</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if session.admin_logged_in %}
+            <div class="carnet-organisation-detail-actions">
+                <a href="{{ url_for('admin_edit_carnet_organisation_page', category_id=category_id, carnet_id=carnet.id) }}" class="btn btn-edit">Modifier</a>
+                <a href="{{ url_for('admin_delete_carnet_organisation', category_id=category_id, carnet_id=carnet.id) }}" class="btn btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce carnet ?')">Supprimer</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="carnet-organisation-detail-content">
+        {% if carnet.image_url %}
+            <div class="carnet-organisation-detail-image">
+                {% if carnet.image_url.startswith('http') %}
+                    <img src="{{ carnet.image_url }}" alt="{{ carnet.title }}" loading="lazy">
+                {% else %}
+                    <img src="{{ url_for('static', filename=carnet.image_url) }}" alt="{{ carnet.title }}" loading="lazy">
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="carnet-organisation-detail-body">
+            <!-- Contenu spécifique selon la catégorie -->
+            {% if category_id == 'bullet_journal' %}
+                <div class="bullet-journal-content">
+                    <h2>📓 Pages du Journal</h2>
+                    {% if carnet.pages %}
+                        {% for page in carnet.pages %}
+                            <div class="journal-page">
+                                <h3>{{ page.title }}</h3>
+                                <p class="page-date">{{ page.date }}</p>
+                                <div class="page-content">{{ page.content }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-content">Aucune page disponible pour le moment.</p>
+                    {% endif %}
+                </div>
+                
+            {% elif category_id == 'listes_generalistes' %}
+                <div class="listes-generalistes-content">
+                    <h2>✅ Liste des Éléments</h2>
+                    {% if carnet.items %}
+                        <ul class="liste-items">
+                            {% for item in carnet.items %}
+                                <li class="liste-item">{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-content">Aucun élément dans cette liste.</p>
+                    {% endif %}
+                </div>
+                
+            {% elif category_id == 'listes_precises' %}
+                <div class="listes-precises-content">
+                    <h2>🎯 Étapes du Projet</h2>
+                    {% if carnet.etapes %}
+                        {% for etape in carnet.etapes %}
+                            <div class="etape-projet">
+                                <h3>{{ etape.titre }}</h3>
+                                <p class="etape-description">{{ etape.description }}</p>
+                                <div class="etape-meta">
+                                    <span class="duree">Durée : {{ etape.duree }}</span>
+                                    <span class="statut statut-{{ etape.statut }}">{{ etape.statut|replace('_', ' ')|title }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-content">Aucune étape définie pour ce projet.</p>
+                    {% endif %}
+                </div>
+                
+            {% elif category_id == 'listes_thematiques' %}
+                <div class="listes-thematiques-content">
+                    <h2>👍 Catégories Thématiques</h2>
+                    {% if carnet.categories %}
+                        {% for categorie in carnet.categories %}
+                            <div class="categorie-thematique">
+                                <h3>{{ categorie.nom }}</h3>
+                                <ul class="taches-list">
+                                    {% for tache in categorie.taches %}
+                                        <li class="tache-item">{{ tache }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-content">Aucune catégorie thématique définie.</p>
+                    {% endif %}
+                </div>
+                
+            {% elif category_id == 'listes_temporelles' %}
+                <div class="listes-temporelles-content">
+                    <h2>⏰ Objectifs Temporels</h2>
+                    {% if carnet.objectifs %}
+                        {% for objectif in carnet.objectifs %}
+                            <div class="objectif-temporel">
+                                <h3>{{ objectif.categorie }}</h3>
+                                <ul class="objectifs-list">
+                                    {% for obj in objectif.objectifs %}
+                                        <li class="objectif-item">{{ obj }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-content">Aucun objectif temporel défini.</p>
+                    {% endif %}
+                </div>
+                
+            {% elif category_id == 'listes_quotidiennes' %}
+                <div class="listes-quotidiennes-content">
+                    <h2>🌞 Routine Quotidienne</h2>
+                    {% if carnet.etapes %}
+                        <ol class="routine-list">
+                            {% for etape in carnet.etapes %}
+                                <li class="routine-item">{{ etape }}</li>
+                            {% endfor %}
+                        </ol>
+                    {% else %}
+                        <p class="no-content">Aucune routine définie.</p>
+                    {% endif %}
+                </div>
+                
+            {% elif category_id == 'todo_list' %}
+                <div class="todo-list-content">
+                    <h2>📝 Liste des Tâches</h2>
+                    {% if carnet.taches %}
+                        {% for tache in carnet.taches %}
+                            <div class="tache-todo">
+                                <h3>{{ tache.titre }}</h3>
+                                <div class="tache-meta">
+                                    <span class="priorite priorite-{{ tache.priorite }}">{{ tache.priorite|title }}</span>
+                                    <span class="statut statut-{{ tache.statut }}">{{ tache.statut|replace('_', ' ')|title }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-content">Aucune tâche dans cette liste.</p>
+                    {% endif %}
+                </div>
+                
+            {% elif category_id == 'post_it_virtuels' %}
+                <div class="post-it-content">
+                    <h2>🟨 Notes Rapides</h2>
+                    {% if carnet.notes %}
+                        <div class="notes-grid">
+                            {% for note in carnet.notes %}
+                                <div class="post-it-note">
+                                    <p>{{ note }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="no-content">Aucune note disponible.</p>
+                    {% endif %}
+                </div>
+                
+            {% else %}
+                <div class="carnet-generic-content">
+                    <h2>📋 Contenu du Carnet</h2>
+                    <p class="no-content">Contenu spécifique à développer pour cette catégorie.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.carnet-organisation-detail-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.carnet-organisation-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    padding: 25px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.carnet-organisation-detail-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.carnet-organisation-detail-icon {
+    font-size: 3em;
+}
+
+.carnet-organisation-detail-text h1 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 2.2em;
+}
+
+.carnet-organisation-detail-description {
+    color: #7f8c8d;
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.carnet-organisation-detail-meta {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.category-name {
+    background: #3498db;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.date {
+    color: #95a5a6;
+    font-size: 0.9em;
+}
+
+.carnet-organisation-detail-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.carnet-organisation-detail-content {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.carnet-organisation-detail-image {
+    height: 300px;
+    overflow: hidden;
+}
+
+.carnet-organisation-detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carnet-organisation-detail-body {
+    padding: 30px;
+}
+
+.carnet-organisation-detail-body h2 {
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+    font-size: 1.8em;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 10px;
+}
+
+/* Styles spécifiques aux catégories */
+.journal-page, .etape-projet, .categorie-thematique, .objectif-temporel, .tache-todo, .post-it-note {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #3498db;
+}
+
+.journal-page h3, .etape-projet h3, .categorie-thematique h3, .objectif-temporel h3, .tache-todo h3 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 1.3em;
+}
+
+.page-date, .etape-description, .tache-item, .objectif-item, .routine-item {
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+.etape-meta, .tache-meta {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.duree, .priorite, .statut {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.priorite-urgente {
+    background: #e74c3c;
+    color: white;
+}
+
+.priorite-importante {
+    background: #f39c12;
+    color: white;
+}
+
+.statut-en_cours {
+    background: #3498db;
+    color: white;
+}
+
+.statut-a_faire {
+    background: #95a5a6;
+    color: white;
+}
+
+.liste-items, .taches-list, .objectifs-list, .routine-list {
+    list-style: none;
+    padding: 0;
+}
+
+.liste-item, .tache-item, .objectif-item, .routine-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.routine-item {
+    padding: 12px 0;
+    font-size: 1.1em;
+}
+
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.post-it-note {
+    background: #f1c40f;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: rotate(-1deg);
+}
+
+.post-it-note p {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.no-content {
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+    padding: 40px;
+}
+
+@media (max-width: 768px) {
+    .carnet-organisation-detail-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .carnet-organisation-detail-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .carnet-organisation-detail-meta {
+        justify-content: center;
+    }
+    
+    .carnet-organisation-detail-actions {
+        justify-content: center;
+    }
+    
+    .notes-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+
+
+

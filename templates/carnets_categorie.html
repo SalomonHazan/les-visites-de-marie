@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ categorie_titre }} - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-nav">
+        <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="breadcrumb-link">
+            ← Retour aux carnets
+        </a>
+    </nav>
+
+    <!-- En-tête de la catégorie -->
+    <div class="categorie-header">
+        <div class="categorie-icon">{{ categorie_icon }}</div>
+        <div class="categorie-info">
+            <h1>{{ categorie_titre }}</h1>
+            <p class="categorie-description">{{ categorie_description }}</p>
+            
+            {% if session.admin_logged_in %}
+                <div class="categorie-header-actions">
+                    <a href="{{ url_for('admin_edit_category_header', menu_id=menu_id, category_id=categorie) }}" class="btn btn-small btn-edit" title="Modifier cette section">
+                        ✏️ Modifier cette section
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="categorie-stats">
+            <span class="page-count-total">{{ carnets|length }} page{{ 's' if carnets|length > 1 else '' }}</span>
+            
+            {% if session.admin_logged_in %}
+                <div class="categorie-actions">
+                    <a href="{{ url_for('admin_new_carnet_page', menu_id=menu_id, categorie=categorie) }}" class="btn btn-primary">
+                        ➕ Ajouter une page
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Grille des carnets -->
+    {% if carnets %}
+        <div class="carnets-grid">
+            {% for carnet in carnets %}
+                <div class="carnet-card">
+                    <div class="carnet-image">
+                        {% if carnet.image_url %}
+                            <img src="{{ url_for('static', filename=carnet.image_url) if carnet.image_url.startswith('uploads/') else carnet.image_url }}" alt="{{ carnet.titre }}">
+                        {% else %}
+                            <div class="no-image">📄</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="carnet-content">
+                        <h4>{{ carnet.titre }}</h4>
+                        <p class="carnet-description">{{ carnet.description_courte }}</p>
+                        <div class="carnet-meta">
+                            <span class="etapes-count">{{ carnet.etapes|length }} étapes</span>
+                            <span class="date">{{ carnet.date_creation[:10] }}</span>
+                        </div>
+                        
+                        <div class="carnet-actions">
+                            <a href="{{ url_for('carnet_detail', menu_id=menu_id, categorie=categorie, slug=carnet.id) }}" class="btn btn-carnet">Voir la page</a>
+                            
+                            {% if session.admin_logged_in %}
+                                <div class="card-admin-actions">
+                                    <a href="{{ url_for('admin_edit_carnet_page', menu_id=menu_id, categorie=categorie, carnet_id=carnet.id) }}" class="btn btn-small btn-edit" title="Modifier">
+                                        ✏️
+                                    </a>
+                                    <a href="{{ url_for('admin_delete_carnet', menu_id=menu_id, categorie=categorie, carnet_id=carnet.id) }}" class="btn btn-small btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette page ?')">
+                                        🗑️
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>Aucune page disponible</h3>
+            <p>Cette catégorie ne contient pas encore de pages. Commencez par en créer une !</p>
+            
+            {% if session.admin_logged_in %}
+                <a href="{{ url_for('admin_new_carnet_page', menu_id=menu_id, categorie=categorie) }}" class="btn btn-primary">
+                    ➕ Créer la première page
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

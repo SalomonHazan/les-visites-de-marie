@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord Admin - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    <div class="admin-dashboard-header">
+        <h1>⚙️ Tableau de bord Admin</h1>
+        <p>Gérez la configuration de votre site</p>
+    </div>
+
+    <!-- Onglets de navigation -->
+    <div class="admin-tabs">
+        <button class="tab-button active" onclick="openTab('general')">📋 Général</button>
+        <button class="tab-button" onclick="openTab('menus')">📚 Menus</button>
+        <button class="tab-button" onclick="openTab('footer')">🦶 Pied de page</button>
+        <button class="tab-button" onclick="openTab('about')">ℹ️ À propos</button>
+    </div>
+
+    <!-- Onglet Général -->
+    <div id="general" class="tab-content active">
+        <div class="config-section">
+            <h2>📋 Configuration Générale</h2>
+            
+            <form method="POST" action="{{ url_for('admin_update_config') }}" class="admin-form">
+                <div class="form-section">
+                    <h3>Informations du site</h3>
+                    
+                    <div class="form-group">
+                        <label for="site_title">Titre du Site *</label>
+                        <input type="text" id="site_title" name="site_title" value="{{ config.site_title }}" required>
+                        <small>Le titre principal qui apparaît dans l'en-tête du site</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="site_subtitle">Sous-titre du Site *</label>
+                        <input type="text" id="site_subtitle" name="site_subtitle" value="{{ config.site_subtitle }}" required>
+                        <small>Le sous-titre qui apparaît sous le titre principal</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="admin_email">Email de l'administrateur</label>
+                        <input type="email" id="admin_email" name="admin_email" value="{{ config.admin_email }}">
+                        <small>Email de contact pour l'administration</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Guide d'utilisation</h3>
+                    <div class="guide-content">
+                        <h4>🎯 Comment utiliser ce site :</h4>
+                        <ul>
+                            <li><strong>Ajouter une ballade :</strong> Allez dans "Carnets de ballades" et cliquez sur "➕ Ajouter une balade"</li>
+                            <li><strong>Ajouter une page de culture :</strong> Allez dans "Carnets de cultures", choisissez une catégorie, puis cliquez sur "➕ Ajouter une page"</li>
+                            <li><strong>Modifier le contenu :</strong> Cliquez sur l'icône ✏️ à côté de l'élément à modifier</li>
+                            <li><strong>Supprimer du contenu :</strong> Cliquez sur l'icône 🗑️ à côté de l'élément à supprimer</li>
+                            <li><strong>Gérer les catégories :</strong> Utilisez l'onglet "Menus" pour ajouter/modifier/supprimer des catégories</li>
+                        </ul>
+                        
+                        <h4>📝 Conseils :</h4>
+                        <ul>
+                            <li>Ajoutez toujours une image pour rendre vos contenus plus attractifs</li>
+                            <li>Rédigez des descriptions détaillées pour informer vos visiteurs</li>
+                            <li>Organisez vos contenus en étapes pour une meilleure lisibilité</li>
+                            <li>N'oubliez pas de sauvegarder vos modifications</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Informations de configuration</h3>
+                    <div class="config-info">
+                        <p><strong>Dernière mise à jour :</strong> {{ config.last_updated[:19] if config.last_updated else 'Jamais' }}</p>
+                        <p><strong>Version :</strong> 1.0.0</p>
+                        <p><strong>Statut :</strong> <span class="status-active">Actif</span></p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Sauvegarder la configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Onglet Menus -->
+    <div id="menus" class="tab-content">
+        <div class="config-section">
+            <h2>📚 Configuration des Menus</h2>
+            
+            <form method="POST" action="{{ url_for('admin_update_config') }}" class="admin-form">
+                <div class="form-section">
+                    <h3>Menus existants</h3>
+                    
+                    {% if config.menus %}
+                        {% for menu in config.menus %}
+                            <div class="menu-item">
+                                <div class="menu-header">
+                                    <h4>{{ menu.title }}</h4>
+                                    <span class="menu-status {{ 'active' if menu.active else 'inactive' }}">
+                                        {{ 'Actif' if menu.active else 'Inactif' }}
+                                    </span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Titre du menu</label>
+                                    <input type="text" name="menu_title_{{ menu.id }}" value="{{ menu.title }}" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Description du menu</label>
+                                    <textarea name="menu_description_{{ menu.id }}" rows="2">{{ menu.description }}</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Statut</label>
+                                    <select name="menu_active_{{ menu.id }}">
+                                        <option value="true" {{ 'selected' if menu.active else '' }}>Actif</option>
+                                        <option value="false" {{ 'selected' if not menu.active else '' }}>Inactif</option>
+                                    </select>
+                                </div>
+                                
+                                {% if menu.id != 'ballades' %}
+                                    <div class="form-group">
+                                        <label>Titre de la page</label>
+                                        <input type="text" name="page_title_{{ menu.id }}" value="{{ menu.page_title if menu.page_title else '' }}">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Description de la page</label>
+                                        <textarea name="page_description_{{ menu.id }}" rows="3">{{ menu.page_description if menu.page_description else '' }}</textarea>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="menu-actions">
+                                    <button type="button" class="btn btn-delete" onclick="deleteMenu('{{ menu.id }}')">🗑️ Supprimer ce menu</button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Aucun menu configuré.</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-section">
+                    <h3>Ajouter un nouveau menu</h3>
+                    
+                    <div class="form-group">
+                        <label for="new_menu_id">Identifiant du menu</label>
+                        <input type="text" id="new_menu_id" name="new_menu_id" placeholder="ex: nouveautes">
+                        <small>Identifiant unique pour le menu (lettres, chiffres et tirets uniquement)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_menu_title">Titre du menu</label>
+                        <input type="text" id="new_menu_title" name="new_menu_title" placeholder="ex: Nouveautés">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_menu_description">Description du menu</label>
+                        <textarea id="new_menu_description" name="new_menu_description" rows="2" placeholder="Description du menu"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Sauvegarder les menus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Onglet Pied de page -->
+    <div id="footer" class="tab-content">
+        <div class="config-section">
+            <h2>🦶 Configuration du Pied de page</h2>
+            
+            <form method="POST" action="{{ url_for('admin_update_config') }}" class="admin-form">
+                <div class="form-section">
+                    <h3>Contenu du pied de page</h3>
+                    
+                    <div class="form-group">
+                        <label for="footer_about">Texte "À propos"</label>
+                        <input type="text" id="footer_about" name="footer_about" value="{{ config.footer_about if config.footer_about else 'À propos' }}">
+                        <small>Texte qui apparaît dans le lien "À propos" du pied de page</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="footer_contact_text">Texte de contact</label>
+                        <input type="text" id="footer_contact_text" name="footer_contact_text" value="{{ config.footer_contact_text if config.footer_contact_text else 'Contactez-moi' }}">
+                        <small>Texte qui apparaît dans le lien de contact</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="footer_contact_email">Email de contact</label>
+                        <input type="email" id="footer_contact_email" name="footer_contact_email" value="{{ config.footer_contact_email if config.footer_contact_email else '' }}">
+                        <small>Email qui sera utilisé pour le lien de contact</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Sauvegarder le pied de page</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Onglet À propos -->
+    <div id="about" class="tab-content">
+        <div class="config-section">
+            <h2>ℹ️ Gestion de la page "À propos"</h2>
+            
+            <form method="POST" action="{{ url_for('admin_update_config') }}" enctype="multipart/form-data" class="admin-form">
+                <div class="form-section">
+                    <h3>Contenu de la page</h3>
+                    
+                    <div class="form-group">
+                        <label for="about_text">Texte de la page "À propos"</label>
+                        <textarea id="about_text" name="about_text" rows="8" placeholder="Rédigez votre présentation...">{{ config.about_text if config.about_text else '' }}</textarea>
+                        <small>Présentez-vous et votre projet</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Image de la page</h3>
+                    
+                    {% if config.about_image %}
+                        <div class="current-image">
+                            <label>Image actuelle :</label>
+                            <img src="{{ url_for('static', filename=config.about_image) if config.about_image.startswith('uploads/') else config.about_image }}" alt="Image actuelle" style="max-width: 200px; max-height: 200px;">
+                        </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label for="about_image_file">Nouvelle image (optionnel)</label>
+                        <input type="file" id="about_image_file" name="about_image_file" accept=".png,.jpg,.jpeg,.gif,.webp">
+                        <small>Formats acceptés : PNG, JPG, JPEG, GIF, WEBP (max 10MB)</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Sauvegarder la page "À propos"</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openTab(tabName) {
+    // Masquer tous les contenus d'onglets
+    var tabContents = document.getElementsByClassName('tab-content');
+    for (var i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove('active');
+    }
+    
+    // Désactiver tous les boutons d'onglets
+    var tabButtons = document.getElementsByClassName('tab-button');
+    for (var i = 0; i < tabButtons.length; i++) {
+        tabButtons[i].classList.remove('active');
+    }
+    
+    // Afficher l'onglet sélectionné
+    document.getElementById(tabName).classList.add('active');
+    
+    // Activer le bouton correspondant
+    event.target.classList.add('active');
+}
+
+function deleteMenu(menuId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce menu ? Cette action est irréversible.')) {
+        fetch(`/admin/config/delete_menu/${menuId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Erreur lors de la suppression du menu');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

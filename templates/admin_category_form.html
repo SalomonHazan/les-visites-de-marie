@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Nouvelle Catégorie - {{ config.site_title }}{% endblock %}
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h2>➕ Nouvelle Catégorie</h2>
+        <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="btn btn-secondary">← Retour au menu</a>
+    </div>
+    
+    <form method="POST" action="{{ url_for('admin_create_category', menu_id=menu_id) }}" class="admin-form">
+        <div class="form-section">
+            <h3>Informations de la catégorie</h3>
+            
+            <div class="form-group">
+                <label for="nom">Nom de la catégorie *</label>
+                <input type="text" id="nom" name="nom" required>
+                <small>Le nom qui sera affiché sur la carte de catégorie</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" rows="3" required></textarea>
+                <small>Une brève description de la catégorie</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="icon">Icône</label>
+                <input type="text" id="icon" name="icon" value="📁" maxlength="2">
+                <small>Une icône emoji pour représenter la catégorie (ex: 🏛️, 🎭, 📚)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="category_id">Identifiant technique</label>
+                <input type="text" id="category_id" name="category_id" pattern="[a-z0-9_-]+">
+                <small>Identifiant unique pour la catégorie (optionnel, sera généré automatiquement si vide)</small>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Créer la catégorie</button>
+            <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Générer automatiquement l'ID technique à partir du nom
+document.getElementById('nom').addEventListener('input', function() {
+    const nom = this.value;
+    const categoryId = nom.toLowerCase()
+        .replace(/[éèêë]/g, 'e')
+        .replace(/[àâä]/g, 'a')
+        .replace(/[îï]/g, 'i')
+        .replace(/[ôö]/g, 'o')
+        .replace(/[ûüù]/g, 'u')
+        .replace(/[ç]/g, 'c')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/-+/g, '_');
+    
+    document.getElementById('category_id').value = categoryId;
+});
+</script>
+{% endblock %} 

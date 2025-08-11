@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Nouveau Carnet de Culture - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h2>➕ Nouveau Carnet de Culture</h2>
+        <a href="{{ url_for('menu_page', menu_id='cultures') }}" class="btn btn-secondary">← Retour aux cultures</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_create_carnet_culture') }}" enctype="multipart/form-data" class="admin-form">
+        <div class="form-section">
+            <h3>Informations générales</h3>
+            
+            <div class="form-group">
+                <label for="categorie">Catégorie</label>
+                <select id="categorie" name="categorie" required>
+                    <option value="musees_expositions" {% if categorie == 'musees_expositions' %}selected{% endif %}>🏛️ Musées & Expositions</option>
+                    <option value="theatre_spectacles" {% if categorie == 'theatre_spectacles' %}selected{% endif %}>🎭 Théâtre & Spectacles</option>
+                    <option value="litterature" {% if categorie == 'litterature' %}selected{% endif %}>📚 Littérature</option>
+                </select>
+                <small>Choisissez la catégorie de votre carnet de culture</small>
+            </div>
+
+            <div class="form-group">
+                <label for="titre">Titre du carnet</label>
+                <input type="text" id="titre" name="titre" required>
+                <small>Le titre principal de votre carnet de culture</small>
+            </div>
+
+            <div class="form-group">
+                <label for="description_courte">Description courte</label>
+                <textarea id="description_courte" name="description_courte" rows="2" required></textarea>
+                <small>Une brève description qui apparaîtra sur la carte</small>
+            </div>
+
+            <div class="form-group">
+                <label for="description_complete">Description complète</label>
+                <textarea id="description_complete" name="description_complete" rows="4" required></textarea>
+                <small>La description détaillée de votre carnet de culture</small>
+            </div>
+
+            <div class="form-group">
+                <label for="image_file">Image du carnet</label>
+                <input type="file" id="image_file" name="image_file" accept="image/*" class="file-input" required>
+                <small>Formats acceptés : PNG, JPG, JPEG, GIF, WEBP (max 10MB)</small>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Étapes du carnet</h3>
+            <div id="etapes-container">
+                <!-- Les étapes seront ajoutées ici dynamiquement -->
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addEtape()">➕ Ajouter une étape</button>
+        </div>
+
+        <div class="form-section">
+            <h3>Conseils</h3>
+            <div id="conseils-container">
+                <!-- Les conseils seront ajoutés ici dynamiquement -->
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addConseil()">➕ Ajouter un conseil</button>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Créer le carnet</button>
+            <a href="{{ url_for('menu_page', menu_id='cultures') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+let etapeIndex = 0;
+let conseilIndex = 0;
+
+function addEtape() {
+    const container = document.getElementById('etapes-container');
+    const etapeDiv = document.createElement('div');
+    etapeDiv.className = 'etape-form';
+    etapeDiv.innerHTML = `
+        <div class="form-group">
+            <label>Titre de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][titre]" required>
+        </div>
+        <div class="form-group">
+            <label>Description de l'étape ${etapeIndex + 1}</label>
+            <textarea name="etapes[${etapeIndex}][description]" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label>Durée de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][duree]" placeholder="ex: 30 min" required>
+        </div>
+        <div class="form-group">
+            <label>Adresse de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][adresse]" placeholder="Ex: Musée du Louvre, 75001 Paris">
+            <small>L'adresse sera utilisée pour générer une carte du parcours</small>
+        </div>
+        <div class="form-group">
+            <label>Métro de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][metro]" placeholder="Ex: Palais Royal - Musée du Louvre (lignes 1 et 7)">
+            <small>Informations sur les transports en commun pour accéder à cette étape</small>
+        </div>
+        <button type="button" class="btn btn-danger btn-small remove-etape" onclick="removeEtape(this)">Supprimer cette étape</button>
+    `;
+    container.appendChild(etapeDiv);
+    etapeIndex++;
+}
+
+function removeEtape(button) {
+    button.parentElement.remove();
+}
+
+function addConseil() {
+    const container = document.getElementById('conseils-container');
+    const conseilDiv = document.createElement('div');
+    conseilDiv.className = 'conseil-form';
+    conseilDiv.innerHTML = `
+        <div class="form-group">
+            <label>Conseil ${conseilIndex + 1}</label>
+            <input type="text" name="conseils[${conseilIndex}]" required>
+            <button type="button" class="btn btn-danger btn-small remove-conseil" onclick="removeConseil(this)">Supprimer</button>
+        </div>
+    `;
+    container.appendChild(conseilDiv);
+    conseilIndex++;
+}
+
+function removeConseil(button) {
+    button.parentElement.remove();
+}
+
+// Ajouter automatiquement une première étape et un premier conseil
+document.addEventListener('DOMContentLoaded', function() {
+    addEtape();
+    addConseil();
+});
+</script>
+{% endblock %} 

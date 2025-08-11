@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}À propos - Les Visites de Marie{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="about-header">
+        <h1>
+            À propos de Marie
+        </h1>
+    </div>
+    
+    <div class="about-content">
+        <div class="about-text">
+            <p>
+                {{ config.about_text if config and config.about_text else 'Passionnée de promenades et d\'aquarelles, je partage mes découvertes parisiennes à travers des carnets de voyage uniques. Chaque visite est une invitation à découvrir la ville sous un angle artistique et personnel.' }}
+            </p>
+        </div>
+        
+        {% if config and config.about_image %}
+        <div class="about-image">
+            <img src="{{ config.about_image }}" alt="Photo de Marie" class="marie-photo">
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

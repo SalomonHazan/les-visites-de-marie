@@ -1,0 +1,62 @@
+{
+  "site_title": "Les Carnets de Salomon",
+  "site_subtitle": "Des carnets à suivre",
+  "admin_email": "salomon@lesvisites.com",
+  "footer_about": "Passionnée de promenades et de visites, je partage mes découvertes à travers mes carnets uniques.\r\n\r\nChaque visite est une invitation à découvrir mon univers sous un angle artistique et personnel.\r\n",
+  "footer_contact_text": "Une question, une suggestion ou simplement envie d'échanger ?",
+  "footer_contact_email": "marie@lesvisites.com",
+  "last_updated": "2025-08-08T14:41:30.432516",
+  "menus": [
+    {
+      "id": "ballades",
+      "title": "Carnet de balades",
+      "description": "Découvrez mes balades et visites.",
+      "active": true,
+      "page_title": "Mes Balades",
+      "page_description": "Chaque balade et visite vous emmène dans un endroit unique avec ses histoires et ses secrets."
+    },
+    {
+      "id": "cultures",
+      "title": "Carnet de culture",
+      "description": "Explorations culturelles et artistiques",
+      "active": true,
+      "page_title": "Carnets de Cultures",
+      "page_description": "H Découvrez mes explorations culturelles et artistiques. Chaque carnet vous emmène dans un univers unique avec ses histoires et ses secrets."
+    },
+    {
+      "id": "sante",
+      "title": "Carnet de santé naturelle",
+      "description": "Bien-être et médecines douces",
+      "active": true
+    },
+    {
+      "id": "jardin",
+      "title": "Carnet Maison et jardin",
+      "description": "Maison et Jardinage",
+      "active": true
+    },
+    {
+      "id": "carnet_organisation",
+      "title": "Carnet d'organisation",
+      "description": "Bullet Journaux & Listes",
+      "active": true,
+      "page_title": "Carnet d'Organisation",
+      "page_description": "Découvrez nos outils et listes pour une organisation personnelle et professionnelle optimale. Bullet journal, listes thématiques, to-do lists et bien plus encore."
+    }
+  ],
+  "about_text": ".\r\n\r\n\r\nPassionnée de promenades et de visites, je partage mes découvertes à travers des carnets uniques.\r\n\r\nChaque visite est une invitation à découvrir un lieux sous un angle artistique et personnel.",
+  "category_headers": {
+    "musees_expositions": {
+      "titre": "Musées & Expositions",
+      "description": "Découvrez les plus beaux musées et expositions de Paris. Chaque carnet vous guide à travers les collections les plus remarquables."
+    },
+    "litterature": {
+      "titre": "Littérature",
+      "description": "Explorez les lieux qui ont inspiré les plus grands écrivains. Suivez les traces des auteurs et découvrez leurs univers."
+    },
+    "theatre_spectacles": {
+      "titre": "Théâtre & Spectacles",
+      "description": "Plongez dans l'univers du théâtre et des spectacles. Découvrez les salles mythiques et les productions les plus captivantes."
+    }
+  }
+}

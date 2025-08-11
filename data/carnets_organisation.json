@@ -1,0 +1,49 @@
+{
+  "bullet_journal": [
+    {
+      "id": "c8831960-2845-4119-9cee-a76d9f9d4bf9",
+      "title": "Principal",
+      "description": "Mon bullet Journal Principa",
+      "image_url": "",
+      "date_created": "2025-08-08T14:43:13.194515"
+    },
+    {
+      "id": "daa46caf-319f-4e33-ac27-448efe58d9d9",
+      "title": "zzz",
+      "description": "zzz",
+      "image_url": "",
+      "date_created": "2025-08-08T15:23:52.898755"
+    },
+    {
+      "id": "dc1ae022-4572-4fc1-a530-f176af52bbfe",
+      "title": "Ma page",
+      "description": "sdsd",
+      "image_url": "",
+      "date_created": "2025-08-08T15:30:39.305445"
+    }
+  ],
+  "todo_list": [
+    {
+      "id": "taches_urgentes",
+      "title": "Tâches Urgentes",
+      "description": "Mes tâches prioritaires à réaliser rapidement.",
+      "image_url": "",
+      "date_created": "2024-01-01",
+      "taches": [
+        {
+          "titre": "Appeler le médecin",
+          "priorite": "urgente",
+          "statut": "a_faire"
+        },
+        {
+          "titre": "Payer les factures",
+          "priorite": "urgente",
+          "statut": "en_cours"
+        }
+      ]
+    }
+  ]
+}
+
+
+

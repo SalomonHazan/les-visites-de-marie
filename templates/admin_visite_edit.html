@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier {{ visite.titre }} - Les Visites de Marie{% endblock %}
+
+{% block content %}
+    <div class="visite-form">
+        <h2>Modifier la visite : {{ visite.titre }}</h2>
+        
+        <form method="POST" action="{{ url_for('admin_update_visite', visite_id=visite.id) }}" class="form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="titre">Titre de la visite</label>
+                <input type="text" id="titre" name="titre" value="{{ visite.titre }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description_complete">Description complète</label>
+                <textarea id="description_complete" name="description_complete" rows="6" required>{{ visite.description_complete }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="image_file">Nouvelle image de la visite</label>
+                <input type="file" id="image_file" name="image_file" accept="image/*" class="file-input">
+                <small>Formats acceptés : PNG, JPG, JPEG, GIF, WEBP (max 10MB)</small>
+            </div>
+            
+            {% if visite.image_url %}
+            <div class="form-group">
+                <label>Image actuelle</label>
+                <div class="current-image">
+                    {% if visite.image_url.startswith('http') %}
+                        <img src="{{ visite.image_url }}" alt="Image actuelle" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=visite.image_url) }}" alt="Image actuelle" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+
+            
+            <div class="etapes-section">
+                <h3>Étapes de la visite</h3>
+                <div id="etapes-container">
+                    {% for etape in visite.etapes %}
+                    <div class="etape-item" data-index="{{ loop.index0 }}">
+                        <div class="form-group">
+                            <label>Titre de l'étape {{ loop.index }}</label>
+                            <input type="text" name="etapes[{{ loop.index0 }}][titre]" value="{{ etape.titre }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description de l'étape {{ loop.index }}</label>
+                            <textarea name="etapes[{{ loop.index0 }}][description]" rows="3" required>{{ etape.description }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Durée de l'étape {{ loop.index }}</label>
+                            <input type="text" name="etapes[{{ loop.index0 }}][duree]" value="{{ etape.duree }}" placeholder="ex: 30 min" required>
+                        </div>
+                                     <div class="form-group">
+                 <label>Adresse de l'étape {{ loop.index }}</label>
+                 <input type="text" name="etapes[{{ loop.index0 }}][adresse]" value="{{ etape.adresse if etape.adresse else '' }}" placeholder="Ex: 123 Avenue des Champs-Élysées, 75008 Paris">
+                 <small>L'adresse sera utilisée pour générer une carte du parcours</small>
+             </div>
+             <div class="form-group">
+                 <label>Métro de l'étape {{ loop.index }}</label>
+                 <input type="text" name="etapes[{{ loop.index0 }}][metro]" value="{{ etape.metro if etape.metro else '' }}" placeholder="Ex: Champs-Élysées - Clemenceau (lignes 1 et 13)">
+                 <small>Informations sur les transports en commun pour accéder à cette étape</small>
+             </div>
+                        <button type="button" class="btn btn-danger btn-small remove-etape" onclick="removeEtape(this)">Supprimer cette étape</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addEtape()">+ Ajouter une étape</button>
+            </div>
+            
+            <div class="conseils-section">
+                <h3>Conseils pour cette visite</h3>
+                <div id="conseils-container">
+                    {% for conseil in visite.conseils %}
+                    <div class="conseil-item" data-index="{{ loop.index0 }}">
+                        <div class="form-group">
+                            <label>Conseil {{ loop.index }}</label>
+                            <input type="text" name="conseils[{{ loop.index0 }}]" value="{{ conseil }}" required>
+                            <button type="button" class="btn btn-danger btn-small remove-conseil" onclick="removeConseil(this)">Supprimer</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addConseil()">+ Ajouter un conseil</button>
+            </div>
+            
+            
+            
+            <div class="form-actions">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn">Mettre à jour la visite</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let etapeIndex = {{ visite.etapes|length }};
+        let conseilIndex = {{ visite.conseils|length }};
+
+        function addEtape() {
+            const container = document.getElementById('etapes-container');
+            const etapeDiv = document.createElement('div');
+            etapeDiv.className = 'etape-item';
+            etapeDiv.dataset.index = etapeIndex;
+            
+            etapeDiv.innerHTML = `
+                <div class="form-group">
+                    <label>Titre de l'étape ${etapeIndex + 1}</label>
+                    <input type="text" name="etapes[${etapeIndex}][titre]" required>
+                </div>
+                <div class="form-group">
+                    <label>Description de l'étape ${etapeIndex + 1}</label>
+                    <textarea name="etapes[${etapeIndex}][description]" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Durée de l'étape ${etapeIndex + 1}</label>
+                    <input type="text" name="etapes[${etapeIndex}][duree]" placeholder="ex: 30 min" required>
+                </div>
+                <div class="form-group">
+                    <label>Adresse de l'étape ${etapeIndex + 1}</label>
+                    <input type="text" name="etapes[${etapeIndex}][adresse]" placeholder="Ex: 123 Avenue des Champs-Élysées, 75008 Paris">
+                    <small>L'adresse sera utilisée pour générer une carte du parcours</small>
+                </div>
+                <div class="form-group">
+                    <label>Métro de l'étape ${etapeIndex + 1}</label>
+                    <input type="text" name="etapes[${etapeIndex}][metro]" placeholder="Ex: Champs-Élysées - Clemenceau (lignes 1 et 13)">
+                    <small>Informations sur les transports en commun pour accéder à cette étape</small>
+                </div>
+                <button type="button" class="btn btn-danger btn-small remove-etape" onclick="removeEtape(this)">Supprimer cette étape</button>
+            `;
+            
+            container.appendChild(etapeDiv);
+            etapeIndex++;
+        }
+
+        function removeEtape(button) {
+            button.parentElement.remove();
+        }
+
+        function addConseil() {
+            const container = document.getElementById('conseils-container');
+            const conseilDiv = document.createElement('div');
+            conseilDiv.className = 'conseil-item';
+            conseilDiv.dataset.index = conseilIndex;
+            
+            conseilDiv.innerHTML = `
+                <div class="form-group">
+                    <label>Conseil ${conseilIndex + 1}</label>
+                    <input type="text" name="conseils[${conseilIndex}]" required>
+                    <button type="button" class="btn btn-danger btn-small remove-conseil" onclick="removeConseil(this)">Supprimer</button>
+                </div>
+            `;
+            
+            container.appendChild(conseilDiv);
+            conseilIndex++;
+        }
+
+        function removeConseil(button) {
+            button.parentElement.parentElement.remove();
+        }
+    </script>
+{% endblock %} 

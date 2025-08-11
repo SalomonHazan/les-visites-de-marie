@@ -1,0 +1,21 @@
+{
+  "carnet_organisation": {
+    "bullet_journal": {
+      "id": "bullet_journal",
+      "name": "📓 Bullet Journal",
+      "description": "Système de journalisation libre avec modules : journal quotidien, semainier, tracker d'habitudes, index, clés.",
+      "icon": "📓",
+      "active": true
+    },
+    "todo_list": {
+      "id": "todo_list",
+      "name": "📝 To-do List",
+      "description": "To-do simple, par priorité (urgent/important), collaborative.",
+      "icon": "📝",
+      "active": true
+    }
+  }
+}
+
+
+

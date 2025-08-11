@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier {{ carnet.titre }} - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h2>✏️ Modifier le Carnet de Culture</h2>
+        <a href="{{ url_for('carnets_culture_categorie', categorie=categorie) }}" class="btn btn-secondary">← Retour à la catégorie</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_update_carnet_culture', categorie=categorie, carnet_id=carnet.id) }}" enctype="multipart/form-data" class="admin-form">
+        <div class="form-section">
+            <h3>Informations générales</h3>
+            
+            <div class="form-group">
+                <label for="categorie">Catégorie</label>
+                <input type="text" id="categorie" value="
+                    {% if categorie == 'musees_expositions' %}🏛️ Musées & Expositions
+                    {% elif categorie == 'theatre_spectacles' %}🎭 Théâtre & Spectacles
+                    {% elif categorie == 'litterature' %}📚 Littérature
+                    {% else %}{{ categorie }}{% endif %}" disabled>
+                <small>La catégorie ne peut pas être modifiée</small>
+            </div>
+
+            <div class="form-group">
+                <label for="titre">Titre du carnet</label>
+                <input type="text" id="titre" name="titre" value="{{ carnet.titre }}" required>
+                <small>Le titre principal de votre carnet de culture</small>
+            </div>
+
+            <div class="form-group">
+                <label for="description_courte">Description courte</label>
+                <textarea id="description_courte" name="description_courte" rows="2" required>{{ carnet.description_courte }}</textarea>
+                <small>Une brève description qui apparaîtra sur la carte</small>
+            </div>
+
+            <div class="form-group">
+                <label for="description_complete">Description complète</label>
+                <textarea id="description_complete" name="description_complete" rows="4" required>{{ carnet.description_complete }}</textarea>
+                <small>La description détaillée de votre carnet de culture</small>
+            </div>
+
+            <div class="form-group">
+                <label for="image_file">Image du carnet</label>
+                {% if carnet.image_url %}
+                    <div class="current-image">
+                        <p>Image actuelle :</p>
+                        {% if carnet.image_url.startswith('http') %}
+                            <img src="{{ carnet.image_url }}" alt="Image actuelle" style="max-width: 200px; max-height: 150px;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename=carnet.image_url) }}" alt="Image actuelle" style="max-width: 200px; max-height: 150px;">
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <input type="file" id="image_file" name="image_file" accept="image/*" class="file-input">
+                <small>Formats acceptés : PNG, JPG, JPEG, GIF, WEBP (max 10MB). Laissez vide pour conserver l'image actuelle.</small>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Étapes du carnet</h3>
+            <div id="etapes-container">
+                {% for etape in carnet.etapes %}
+                    <div class="etape-form">
+                        <div class="form-group">
+                            <label>Titre de l'étape {{ loop.index }}</label>
+                            <input type="text" name="etapes[{{ loop.index0 }}][titre]" value="{{ etape.titre }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description de l'étape {{ loop.index }}</label>
+                            <textarea name="etapes[{{ loop.index0 }}][description]" rows="3" required>{{ etape.description }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Durée de l'étape {{ loop.index }}</label>
+                            <input type="text" name="etapes[{{ loop.index0 }}][duree]" value="{{ etape.duree }}" placeholder="ex: 30 min" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Adresse de l'étape {{ loop.index }}</label>
+                            <input type="text" name="etapes[{{ loop.index0 }}][adresse]" value="{{ etape.adresse }}" placeholder="Ex: Musée du Louvre, 75001 Paris">
+                            <small>L'adresse sera utilisée pour générer une carte du parcours</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Métro de l'étape {{ loop.index }}</label>
+                            <input type="text" name="etapes[{{ loop.index0 }}][metro]" value="{{ etape.metro }}" placeholder="Ex: Palais Royal - Musée du Louvre (lignes 1 et 7)">
+                            <small>Informations sur les transports en commun pour accéder à cette étape</small>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-small remove-etape" onclick="removeEtape(this)">Supprimer cette étape</button>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addEtape()">➕ Ajouter une étape</button>
+        </div>
+
+        <div class="form-section">
+            <h3>Conseils</h3>
+            <div id="conseils-container">
+                {% for conseil in carnet.conseils %}
+                    <div class="conseil-form">
+                        <div class="form-group">
+                            <label>Conseil {{ loop.index }}</label>
+                            <input type="text" name="conseils[{{ loop.index0 }}]" value="{{ conseil }}" required>
+                            <button type="button" class="btn btn-danger btn-small remove-conseil" onclick="removeConseil(this)">Supprimer</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addConseil()">➕ Ajouter un conseil</button>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Modifier le carnet</button>
+            <a href="{{ url_for('carnets_culture_categorie', categorie=categorie) }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+let etapeIndex = {{ carnet.etapes|length }};
+let conseilIndex = {{ carnet.conseils|length }};
+
+function addEtape() {
+    const container = document.getElementById('etapes-container');
+    const etapeDiv = document.createElement('div');
+    etapeDiv.className = 'etape-form';
+    etapeDiv.innerHTML = `
+        <div class="form-group">
+            <label>Titre de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][titre]" required>
+        </div>
+        <div class="form-group">
+            <label>Description de l'étape ${etapeIndex + 1}</label>
+            <textarea name="etapes[${etapeIndex}][description]" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label>Durée de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][duree]" placeholder="ex: 30 min" required>
+        </div>
+        <div class="form-group">
+            <label>Adresse de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][adresse]" placeholder="Ex: Musée du Louvre, 75001 Paris">
+            <small>L'adresse sera utilisée pour générer une carte du parcours</small>
+        </div>
+        <div class="form-group">
+            <label>Métro de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][metro]" placeholder="Ex: Palais Royal - Musée du Louvre (lignes 1 et 7)">
+            <small>Informations sur les transports en commun pour accéder à cette étape</small>
+        </div>
+        <button type="button" class="btn btn-danger btn-small remove-etape" onclick="removeEtape(this)">Supprimer cette étape</button>
+    `;
+    container.appendChild(etapeDiv);
+    etapeIndex++;
+}
+
+function removeEtape(button) {
+    button.parentElement.remove();
+}
+
+function addConseil() {
+    const container = document.getElementById('conseils-container');
+    const conseilDiv = document.createElement('div');
+    conseilDiv.className = 'conseil-form';
+    conseilDiv.innerHTML = `
+        <div class="form-group">
+            <label>Conseil ${conseilIndex + 1}</label>
+            <input type="text" name="conseils[${conseilIndex}]" required>
+            <button type="button" class="btn btn-danger btn-small remove-conseil" onclick="removeConseil(this)">Supprimer</button>
+        </div>
+    `;
+    container.appendChild(conseilDiv);
+    conseilIndex++;
+}
+
+function removeConseil(button) {
+    button.parentElement.remove();
+}
+</script>
+{% endblock %} 

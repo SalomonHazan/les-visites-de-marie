@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier le titre de la page - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h2>✏️ Modifier le titre de la page</h2>
+        <a href="{{ url_for('carnets_culture_categorie', categorie=category_id) }}" class="btn btn-secondary">← Retour à la catégorie</a>
+    </div>
+    
+    <form method="POST" action="{{ url_for('admin_update_page_title', menu_id=menu_id, category_id=category_id) }}" class="admin-form">
+        <div class="form-section">
+            <h3>Informations de la page</h3>
+            
+            <div class="form-group">
+                <label for="page_title">Titre de la page *</label>
+                <input type="text" id="page_title" name="page_title" value="{{ category.titre if category.titre else category.nom }}" required>
+                <small>Le titre qui sera affiché en haut de la page de catégorie</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Nom de la catégorie</label>
+                <input type="text" value="{{ category.nom }}" disabled>
+                <small>Le nom de la catégorie ne peut pas être modifié ici</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Description de la catégorie</label>
+                <input type="text" value="{{ category.description }}" disabled>
+                <small>La description de la catégorie ne peut pas être modifiée ici</small>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Modifier le titre de la page</button>
+            <a href="{{ url_for('carnets_culture_categorie', categorie=category_id) }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

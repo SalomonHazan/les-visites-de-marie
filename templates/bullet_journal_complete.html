@@ -1,0 +1,1085 @@
+{% extends "base.html" %}
+
+{% block title %}Digital Bullet Journal - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Bullet Journal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Poppins:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --primary: #7c3aed;
+            --secondary: #f59e0b;
+            --accent: #10b981;
+            --paper: #f8f3e6;
+            --ink: #333333;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: var(--ink);
+        }
+        
+        .handwriting {
+            font-family: 'Gochi Hand', cursive;
+        }
+        
+        .paper-texture {
+            background-color: var(--paper);
+            background-image: 
+                linear-gradient(90deg, rgba(175,175,175,0.1) 1px, transparent 1px),
+                linear-gradient(rgba(175,175,175,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .dot-grid {
+            background-image: radial-gradient(circle, #ccc 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c4b5fd;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6;
+        }
+        
+        /* Drawing canvas */
+        #drawing-canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+        
+        /* Toolbar */
+        .toolbar {
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tool-btn {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 4px;
+            font-size: 14px;
+            min-width: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tool-btn:hover {
+            background: #f3f4f6;
+            border-color: var(--primary);
+        }
+        
+        .tool-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Text editor */
+        .text-editor {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .text-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 200px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Poppins', sans-serif;
+            resize: vertical;
+        }
+        
+        /* Task system */
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.2s;
+        }
+        
+        .task-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .task-checkbox {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .task-text {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            cursor: text;
+        }
+        
+        .task-text:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: white;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .task-item:hover .task-actions {
+            opacity: 1;
+        }
+        
+        .task-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .task-btn.edit {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .task-btn.delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        /* Drawing tools */
+        .drawing-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .brush-size {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+        }
+        
+        /* Sticker grid */
+        .sticker-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .sticker-item {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sticker-item:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Draggable elements */
+        .draggable-element {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            z-index: 10;
+        }
+        
+        .draggable-element.selected {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        /* Bullet journal symbols */
+        .bullet-task { color: #000; }
+        .bullet-event { color: #0000ff; }
+        .bullet-note { color: #000000; }
+        .bullet-migrated { color: #000000; }
+        .bullet-scheduled { color: #000000; }
+        .bullet-completed { color: #000000; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center">
+                <h1 class="text-3xl font-bold text-purple-700">✏️ Bullet Journal</h1>
+                <span id="current-date" class="ml-4 text-gray-600 text-lg"></span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button id="mode-toggle" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                        Viewer Mode
+                    </button>
+                </div>
+                <button id="save-btn" class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
+                    <i class="fas fa-save mr-2"></i> Save
+                </button>
+                <button id="export-btn" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
+                    <i class="fas fa-download mr-2"></i> Export
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <div id="app-container" class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar -->
+            <div id="sidebar" class="lg:w-64 bg-white rounded-xl shadow-md p-4 h-fit sticky top-8 transition-all duration-300">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Outils</h2>
+                
+                <!-- Tools Container -->
+                <div id="tools-container">
+                    <!-- Task Tools -->
+                    <div id="task-tools" class="tools-section">
+                        <h3 class="text-sm font-medium text-gray-600 mb-2">Outils de tâches</h3>
+                        <div class="space-y-2">
+                            <button id="add-task-btn" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-plus mr-2"></i> Ajouter une tâche
+                            </button>
+                            <div class="text-sm text-gray-500">
+                                <p>• Tâche normale</p>
+                                <p>○ Événement</p>
+                                <p>- Note</p>
+                                <p>> Migré</p>
+                                <p>< Échéance</p>
+                                <p>✓ Terminé</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Image Tools -->
+                    <div id="image-tools" class="tools-section">
+                        <h3 class="text-sm font-medium text-gray-600 mb-2">Images & Stickers</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="image-upload" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Importer une image
+                                </label>
+                                <input type="file" id="image-upload" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">Stickers</h4>
+                                <div id="sticker-palette" class="sticker-grid">
+                                    <!-- Stickers will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Journal Content -->
+            <div class="flex-1">
+                <div class="paper-texture rounded-xl p-6 min-h-[80vh] relative">
+                    <!-- Content tabs -->
+                    <div class="flex border-b border-gray-200 mb-6">
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600 tab-active" data-tab="page">Page</button>
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600" data-tab="tasks">Tasks</button>
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600" data-tab="draw">Draw</button>
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600" data-tab="images">Images</button>
+                    </div>
+                    
+                    <!-- Page Content Editor -->
+                    <div id="page-tab" class="tab-content">
+                        <div class="mb-6">
+                            <input type="text" id="page-title" placeholder="Titre de la page..." class="w-full bg-transparent border-b-2 border-gray-300 focus:border-purple-500 focus:outline-none py-2 text-2xl font-bold text-gray-800">
+                        </div>
+                        
+                        <!-- Text Editor Toolbar -->
+                        <div class="text-editor">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Outils de texte</h3>
+                            <div class="text-toolbar mb-4" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <select id="font-family" class="tool-btn">
+                                    <option value="Poppins">Normal</option>
+                                    <option value="Gochi Hand">Handwriting</option>
+                                    <option value="Arial">Arial</option>
+                                    <option value="Times New Roman">Times</option>
+                                </select>
+                                <button class="tool-btn" data-command="bold"><i class="fas fa-bold"></i></button>
+                                <button class="tool-btn" data-command="italic"><i class="fas fa-italic"></i></button>
+                                <button class="tool-btn" data-command="underline"><i class="fas fa-underline"></i></button>
+                                <button class="tool-btn" data-command="strikethrough"><i class="fas fa-strikethrough"></i></button>
+                                <button class="tool-btn" data-command="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
+                                <button class="tool-btn" data-command="insertOrderedList"><i class="fas fa-list-ol"></i></button>
+                                <button class="tool-btn" data-command="outdent"><i class="fas fa-outdent"></i></button>
+                                <button class="tool-btn" data-command="indent"><i class="fas fa-indent"></i></button>
+                                <button class="tool-btn" data-command="createLink"><i class="fas fa-link"></i></button>
+                                <button class="tool-btn" data-command="justifyLeft"><i class="fas fa-align-left"></i></button>
+                                <button class="tool-btn" data-command="removeFormat"><i class="fas fa-eraser"></i></button>
+                            </div>
+                            <div id="page-content" class="text-input" contenteditable="true">
+                                Commencez à écrire votre journal ici...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tasks Tab Content -->
+                    <div id="tasks-tab" class="tab-content hidden">
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-700">Tâches du jour</h3>
+                            </div>
+                            <div id="tasks-list" class="space-y-2">
+                                <!-- Tasks will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Draw Tab Content -->
+                    <div id="draw-tab" class="tab-content hidden">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Outils de dessin</h3>
+                        <!-- Drawing Toolbar -->
+                        <div class="drawing-tools mb-4" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <button class="tool-btn active" data-tool="pen"><i class="fas fa-pen"></i></button>
+                            <button class="tool-btn" data-tool="brush"><i class="fas fa-paint-brush"></i></button>
+                            <button class="tool-btn" data-tool="eraser"><i class="fas fa-eraser"></i></button>
+                            <input type="color" id="drawing-color" class="color-picker" value="#000000">
+                            <input type="range" id="brush-size" class="brush-size" min="1" max="20" value="3">
+                            <button class="tool-btn" id="clear-canvas"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="drawing-container">
+                            <canvas id="drawing-canvas" width="800" height="600"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Images Tab Content -->
+                    <div id="images-tab" class="tab-content hidden">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4">Galerie d'images</h3>
+                            <div id="image-gallery" class="grid grid-cols-4 gap-4">
+                                <!-- Images will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTab = 'page';
+        let isDrawing = false;
+        let drawingContext;
+        let currentTool = 'pen';
+        let currentColor = '#000000';
+        let currentBrushSize = 3;
+        let tasks = [];
+        let pageData = {
+            title: '',
+            content: '',
+            tasks: [],
+            drawing: null,
+            stickers: [],
+            images: []
+        };
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            initializeApp();
+            initializeTools();
+            loadPageData();
+            setupEventListeners();
+            generateStickers();
+            
+            // Force display of tools for current tab
+            setTimeout(() => {
+                console.log('Forcing display of tools for current tab...');
+                const activeTab = document.querySelector('.tab-btn.tab-active');
+                if (activeTab) {
+                    const tabName = activeTab.dataset.tab;
+                    console.log('Active tab:', tabName);
+                    updateToolsForTab(tabName);
+                }
+            }, 100);
+        });
+        
+        function initializeApp() {
+            // Set current date
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', options);
+            
+            // Initialize drawing canvas
+            const canvas = document.getElementById('drawing-canvas');
+            if (canvas) {
+                drawingContext = canvas.getContext('2d');
+                setupDrawingCanvas();
+            }
+        }
+        
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+            
+            // Text editor tools
+            document.querySelectorAll('[data-command]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const command = this.dataset.command;
+                    if (command === 'createLink') {
+                        const url = prompt('Entrez l\'URL:');
+                        if (url) document.execCommand(command, false, url);
+                    } else {
+                        document.execCommand(command, false, null);
+                    }
+                });
+            });
+            
+            // Drawing tools
+            document.querySelectorAll('[data-tool]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentTool = this.dataset.tool;
+                    updateDrawingToolButtons();
+                });
+            });
+            
+            // Drawing controls
+            document.getElementById('drawing-color').addEventListener('change', function() {
+                currentColor = this.value;
+            });
+            
+            document.getElementById('brush-size').addEventListener('change', function() {
+                currentBrushSize = parseInt(this.value);
+            });
+            
+            document.getElementById('clear-canvas').addEventListener('click', function() {
+                if (confirm('Voulez-vous effacer tout le dessin ?')) {
+                    clearCanvas();
+                }
+            });
+            
+            // Task management
+            document.getElementById('add-task-btn').addEventListener('click', addNewTask);
+            
+            // Save and export
+            document.getElementById('save-btn').addEventListener('click', savePage);
+            document.getElementById('export-btn').addEventListener('click', exportPage);
+            
+            // Image upload
+            document.getElementById('image-upload').addEventListener('change', handleImageUpload);
+        }
+        
+        function switchTab(tab) {
+            console.log('Switching to tab:', tab); // Debug log
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+            });
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('tab-active');
+            
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`${tab}-tab`).classList.remove('hidden');
+            
+            // Update tools sidebar
+            updateToolsForTab(tab);
+            
+            currentTab = tab;
+        }
+        
+        function updateToolsForTab(tab) {
+            console.log('Updating tools for tab:', tab);
+            
+            // Hide all tool sections in sidebar first
+            document.querySelectorAll('.tools-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show appropriate tools for current tab
+            if (tab === 'tasks') {
+                const taskTools = document.getElementById('task-tools');
+                if (taskTools) {
+                    taskTools.style.display = 'block';
+                    console.log('Showing task tools');
+                }
+            } else if (tab === 'images') {
+                const imageTools = document.getElementById('image-tools');
+                if (imageTools) {
+                    imageTools.style.display = 'block';
+                    console.log('Showing image tools');
+                }
+            }
+        }
+        
+        // Initialize tools for the default tab (page)
+        function initializeTools() {
+            console.log('Initializing tools...');
+            // Check which tab is currently active
+            const activeTab = document.querySelector('.tab-btn.tab-active');
+            if (activeTab) {
+                const tabName = activeTab.dataset.tab;
+                console.log('Active tab found:', tabName);
+                updateToolsForTab(tabName);
+            } else {
+                console.log('No active tab found, defaulting to page');
+                updateToolsForTab('page');
+            }
+        }
+        
+        function setupDrawingCanvas() {
+            const canvas = document.getElementById('drawing-canvas');
+            if (!canvas) return;
+            
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Set initial canvas style
+            drawingContext.strokeStyle = currentColor;
+            drawingContext.lineWidth = currentBrushSize;
+            drawingContext.lineCap = 'round';
+        }
+        
+        function startDrawing(e) {
+            if (currentTab !== 'draw') return;
+            
+            isDrawing = true;
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            drawingContext.beginPath();
+            drawingContext.moveTo(x, y);
+        }
+        
+        function draw(e) {
+            if (!isDrawing || currentTab !== 'draw') return;
+            
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (currentTool === 'eraser') {
+                drawingContext.strokeStyle = '#ffffff';
+                drawingContext.lineWidth = currentBrushSize * 2;
+            } else {
+                drawingContext.strokeStyle = currentColor;
+                drawingContext.lineWidth = currentBrushSize;
+            }
+            
+            drawingContext.lineTo(x, y);
+            drawingContext.stroke();
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        function clearCanvas() {
+            const canvas = document.getElementById('drawing-canvas');
+            if (canvas) {
+                drawingContext.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        
+        function updateDrawingToolButtons() {
+            document.querySelectorAll('[data-tool]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tool="${currentTool}"]`).classList.add('active');
+        }
+        
+        function addNewTask() {
+            const task = {
+                id: Date.now(),
+                text: 'Nouvelle tâche',
+                completed: false,
+                type: 'task' // task, event, note, migrated, scheduled, completed
+            };
+            
+            tasks.push(task);
+            renderTasks();
+        }
+        
+        function renderTasks() {
+            const tasksList = document.getElementById('tasks-list');
+            if (!tasksList) return;
+            
+            tasksList.innerHTML = '';
+            
+            tasks.forEach(task => {
+                const taskElement = createTaskElement(task);
+                tasksList.appendChild(taskElement);
+            });
+        }
+        
+        function createTaskElement(task) {
+            const div = document.createElement('div');
+            div.className = 'task-item';
+            div.dataset.taskId = task.id;
+            
+            const bulletSymbols = {
+                'task': '•',
+                'event': '○',
+                'note': '-',
+                'migrated': '>',
+                'scheduled': '<',
+                'completed': '✓'
+            };
+            
+            div.innerHTML = `
+                <span class="bullet-${task.type}" style="margin-right: 8px; font-weight: bold;">${bulletSymbols[task.type]}</span>
+                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                <span class="task-text" contenteditable="true">${task.text}</span>
+                <div class="task-actions">
+                    <button class="task-btn edit" onclick="editTask(${task.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="task-btn delete" onclick="deleteTask(${task.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add event listeners
+            const checkbox = div.querySelector('.task-checkbox');
+            const textSpan = div.querySelector('.task-text');
+            
+            checkbox.addEventListener('change', function() {
+                task.completed = this.checked;
+                updateTaskType(task.id, this.checked ? 'completed' : 'task');
+            });
+            
+            textSpan.addEventListener('blur', function() {
+                task.text = this.textContent;
+            });
+            
+            return div;
+        }
+        
+        function editTask(taskId) {
+            const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+            const textSpan = taskElement.querySelector('.task-text');
+            textSpan.focus();
+        }
+        
+        function deleteTask(taskId) {
+            if (confirm('Voulez-vous supprimer cette tâche ?')) {
+                tasks = tasks.filter(task => task.id !== taskId);
+                renderTasks();
+            }
+        }
+        
+        function updateTaskType(taskId, newType) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.type = newType;
+                renderTasks();
+            }
+        }
+        
+        function generateStickers() {
+            const stickerPalette = document.getElementById('sticker-palette');
+            if (!stickerPalette) return;
+            
+            // Generate hundreds of stickers with different emojis and symbols
+            const stickers = [
+                '⭐', '❤️', '💙', '💚', '💛', '💜', '🖤', '🤍', '💖', '💝',
+                '🎉', '🎊', '🎈', '🎁', '🎂', '🎃', '🎄', '🎅', '🎆', '🎇',
+                '✨', '🌟', '💫', '⭐', '🔥', '💥', '⚡', '💦', '💧', '🌊',
+                '🌸', '🌺', '🌻', '🌼', '🌷', '🌹', '🌱', '🌲', '🌳', '🌴',
+                '🍀', '🌿', '☘️', '🌵', '🌾', '🌽', '🍎', '🍐', '🍊', '🍋',
+                '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥',
+                '🥝', '🍅', '🥑', '🥦', '🥬', '🥒', '🌶️', '🌽', '🥕', '🥔',
+                '🍞', '🥐', '🥯', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞',
+                '🥓', '🥩', '🍗', '🍖', '🦴', '🌭', '🍔', '🍟', '🍕', '🥪',
+                '🥙', '🧆', '🌮', '🌯', '🥗', '🥘', '🥫', '🍝', '🍜', '🍲',
+                '🍛', '🍣', '🍱', '🥟', '🍤', '🍙', '🍚', '🍘', '🍥', '🥠',
+                '🍢', '🍡', '🍧', '🍨', '🍦', '🥧', '🧁', '🍰', '🎂', '🍮',
+                '🍭', '🍬', '🍫', '🍿', '🧂', '🥨', '🥯', '🥖', '🥐', '🍞',
+                '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
+                '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🐣',
+                '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛',
+                '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🕷️', '🕸️', '🦂', '🐢',
+                '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡',
+                '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅', '🐆', '🦓',
+                '🦍', '🦧', '🐘', '🦛', '🦏', '🐪', '🐫', '🦙', '🦒', '🐃',
+                '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕',
+                '🐩', '🦮', '🐕‍🦺', '🐈', '🐈‍⬛', '🐓', '🦃', '🦚', '🦜', '🦢',
+                '🦩', '🕊️', '🐇', '🦝', '🦨', '🦡', '🦫', '🦦', '🦥', '🐁',
+                '🐀', '🐿️', '🦔', '☀️', '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️',
+                '⛈️', '🌩️', '🌨️', '☃️', '⛄', '🌬️', '💨', '🌪️', '🌫️', '🌊',
+                '💧', '💦', '☔', '☂️', '🌂', '⛱️', '🏖️', '🏝️', '🏔️', '🗻',
+                '⛰️', '🌋', '🗾', '🏕️', '⛺', '🏠', '🏡', '🏘️', '🏚️', '🏗️',
+                '🏭', '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨', '🏪', '🏫',
+                '🏩', '💒', '⛪', '🕌', '🕍', '🛕', '⛩️', '🕋', '⛲', '🗼',
+                '🗽', '🗿', '🏛️', '⛺', '🏟️', '🎡', '🎢', '🎠', '⛲', '🎪',
+                '🚂', '🚃', '🚄', '🚅', '🚆', '🚇', '🚈', '🚉', '🚊', '🚝',
+                '🚞', '🚋', '🚌', '🚍', '🚎', '🚐', '🚑', '🚒', '🚓', '🚔',
+                '🚕', '🚖', '🚗', '🚘', '🚙', '🚚', '🚛', '🚜', '🏎️', '🏍️',
+                '🛵', '🦽', '🦼', '🛴', '🚲', '🛹', '🛼', '🛻', '🚁', '🚟',
+                '🚠', '🚡', '🚀', '🛸', '✈️', '🛫', '🛬', '🪂', '💺', '🛰️',
+                '🚉', '🚊', '🚝', '🚞', '🚋', '🚌', '🚍', '🚎', '🚐', '🚑',
+                '🚒', '🚓', '🚔', '🚕', '🚖', '🚗', '🚘', '🚙', '🚚', '🚛'
+            ];
+            
+            stickers.forEach((sticker, index) => {
+                const stickerElement = document.createElement('div');
+                stickerElement.className = 'sticker-item';
+                stickerElement.textContent = sticker;
+                stickerElement.dataset.sticker = sticker;
+                stickerElement.addEventListener('click', () => addStickerToPage(sticker));
+                stickerPalette.appendChild(stickerElement);
+            });
+        }
+        
+        function addStickerToPage(sticker) {
+            if (currentTab !== 'images') return;
+            
+            const stickerElement = document.createElement('div');
+            stickerElement.className = 'draggable-element sticker';
+            stickerElement.style.position = 'absolute';
+            stickerElement.style.left = '50px';
+            stickerElement.style.top = '50px';
+            stickerElement.style.fontSize = '24px';
+            stickerElement.style.cursor = 'move';
+            stickerElement.textContent = sticker;
+            
+            // Add to page data
+            pageData.stickers.push({
+                id: Date.now(),
+                content: sticker,
+                x: 50,
+                y: 50
+            });
+            
+            // Add to page
+            const pageContainer = document.querySelector('.paper-texture');
+            pageContainer.appendChild(stickerElement);
+            
+            // Make draggable
+            makeDraggable(stickerElement);
+        }
+        
+        function makeDraggable(element) {
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+            
+            element.addEventListener('mousedown', dragStart);
+            element.addEventListener('mousemove', drag);
+            element.addEventListener('mouseup', dragEnd);
+            element.addEventListener('mouseleave', dragEnd);
+            
+            function dragStart(e) {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+                
+                if (e.target === element) {
+                    isDragging = true;
+                }
+            }
+            
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                    
+                    xOffset = currentX;
+                    yOffset = currentY;
+                    
+                    setTranslate(currentX, currentY, element);
+                }
+            }
+            
+            function setTranslate(xPos, yPos, el) {
+                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+            }
+            
+            function dragEnd(e) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+            }
+        }
+        
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageUrl = e.target.result;
+                
+                // Add to page data
+                pageData.images.push({
+                    id: Date.now(),
+                    url: imageUrl,
+                    x: 50,
+                    y: 50
+                });
+                
+                // Add to gallery
+                addImageToGallery(imageUrl);
+                
+                // Add to page if on images tab
+                if (currentTab === 'images') {
+                    addImageToPage(imageUrl);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function addImageToGallery(imageUrl) {
+            const gallery = document.getElementById('image-gallery');
+            if (!gallery) return;
+            
+            const imageElement = document.createElement('div');
+            imageElement.className = 'relative';
+            imageElement.innerHTML = `
+                <img src="${imageUrl}" alt="Uploaded image" class="w-full h-24 object-cover rounded-lg">
+                <button class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 text-xs" onclick="removeImage(this)">
+                    ×
+                </button>
+            `;
+            gallery.appendChild(imageElement);
+        }
+        
+        function addImageToPage(imageUrl) {
+            const imageElement = document.createElement('img');
+            imageElement.src = imageUrl;
+            imageElement.className = 'draggable-element';
+            imageElement.style.position = 'absolute';
+            imageElement.style.left = '50px';
+            imageElement.style.top = '50px';
+            imageElement.style.maxWidth = '200px';
+            imageElement.style.cursor = 'move';
+            
+            const pageContainer = document.querySelector('.paper-texture');
+            pageContainer.appendChild(imageElement);
+            
+            makeDraggable(imageElement);
+        }
+        
+        function removeImage(button) {
+            if (confirm('Voulez-vous supprimer cette image ?')) {
+                button.parentElement.remove();
+            }
+        }
+        
+        function loadPageData() {
+            const journalId = '{{ journal_id }}';
+            const pageId = '{{ page_id }}';
+            
+            fetch(`/bullet-journal/${journalId}/page/${pageId}/data`)
+                .then(response => response.json())
+                .then(data => {
+                    pageData = data;
+                    
+                    // Load title
+                    document.getElementById('page-title').value = data.title || '';
+                    
+                    // Load content
+                    document.getElementById('page-content').innerHTML = data.content || '';
+                    
+                    // Load tasks
+                    tasks = data.tasks || [];
+                    renderTasks();
+                    
+                    // Load drawing
+                    if (data.drawing) {
+                        loadDrawing(data.drawing);
+                    }
+                    
+                    // Load stickers and images
+                    if (data.stickers) {
+                        data.stickers.forEach(sticker => {
+                            addStickerToPage(sticker.content);
+                        });
+                    }
+                    
+                    if (data.images) {
+                        data.images.forEach(image => {
+                            addImageToGallery(image.url);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading page data:', error);
+                });
+        }
+        
+        function loadDrawing(drawingData) {
+            const canvas = document.getElementById('drawing-canvas');
+            if (!canvas || !drawingData) return;
+            
+            // Clear canvas
+            drawingContext.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Load drawing paths
+            if (drawingData.paths) {
+                drawingData.paths.forEach(path => {
+                    drawingContext.beginPath();
+                    drawingContext.strokeStyle = path.color || '#000000';
+                    drawingContext.lineWidth = path.size || 3;
+                    drawingContext.lineCap = 'round';
+                    
+                    if (path.points && path.points.length > 0) {
+                        drawingContext.moveTo(path.points[0].x, path.points[0].y);
+                        for (let i = 1; i < path.points.length; i++) {
+                            drawingContext.lineTo(path.points[i].x, path.points[i].y);
+                        }
+                        drawingContext.stroke();
+                    }
+                });
+            }
+        }
+        
+        function savePage() {
+            const journalId = '{{ journal_id }}';
+            const pageId = '{{ page_id }}';
+            
+            // Collect data
+            const data = {
+                title: document.getElementById('page-title').value,
+                content: document.getElementById('page-content').innerHTML,
+                tasks: tasks,
+                drawing: {
+                    paths: [] // TODO: Implement drawing path collection
+                },
+                stickers: pageData.stickers,
+                images: pageData.images
+            };
+            
+            fetch(`/bullet-journal/${journalId}/page/${pageId}/save`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification('Page sauvegardée avec succès !', 'success');
+                } else {
+                    showNotification('Erreur lors de la sauvegarde', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving page:', error);
+                showNotification('Erreur lors de la sauvegarde', 'error');
+            });
+        }
+        
+        function exportPage() {
+            // TODO: Implement PDF export
+            showNotification('Export PDF en cours de développement', 'info');
+        }
+        
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

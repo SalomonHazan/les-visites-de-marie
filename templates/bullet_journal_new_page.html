@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Nouvelle Page - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="new-page-container">
+    <div class="new-page-header">
+        <h1>Nouvelle Page</h1>
+        <p class="journal-title">{{ journal.title|default('Bullet Journal') }}</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('bullet_journal_create_page', journal_id=journal_id) }}" class="new-page-form">
+        <div class="form-group">
+            <label for="title">Titre de la page *</label>
+            <input type="text" id="title" name="title" required class="form-control" placeholder="Ex: Mes objectifs du mois">
+        </div>
+
+        <div class="form-group">
+            <label>Templates disponibles</label>
+            <div class="templates-grid">
+                {% for template_id, template in templates.items() %}
+                    <div class="template-option">
+                        <input type="radio" id="template_{{ template_id }}" name="template" value="{{ template_id }}" 
+                               {% if template_id == 'blank' %}checked{% endif %} class="template-radio">
+                        <label for="template_{{ template_id }}" class="template-label">
+                            <div class="template-preview template-{{ template_id }}">
+                                <div class="template-icon">
+                                    {% if template_id == 'blank' %}📄
+                                    {% elif template_id == 'lined' %}📝
+                                    {% elif template_id == 'grid' %}📊
+                                    {% elif template_id == 'dots' %}🔘
+                                    {% else %}📄
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="template-info">
+                                <h3>{{ template.name }}</h3>
+                                <p>{{ template.description }}</p>
+                            </div>
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('bullet_journal_view', journal_id=journal_id) }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">Créer la page</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.new-page-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.new-page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 25px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.new-page-header h1 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 2.5em;
+}
+
+.journal-title {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.new-page-form {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 30px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1.2em;
+}
+
+.form-control {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.template-option {
+    position: relative;
+}
+
+.template-radio {
+    display: none;
+}
+
+.template-label {
+    display: block;
+    cursor: pointer;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.template-label:hover {
+    border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+}
+
+.template-radio:checked + .template-label {
+    border-color: #27ae60;
+    background: #f8fff9;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.2);
+}
+
+.template-preview {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.template-icon {
+    font-size: 2.5em;
+    color: #7f8c8d;
+}
+
+.template-info h3 {
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+    font-size: 1.2em;
+}
+
+.template-info p {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ecf0f1;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #229954;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .new-page-container {
+        padding: 15px;
+    }
+    
+    .new-page-form {
+        padding: 20px;
+    }
+    
+    .templates-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+
+
+

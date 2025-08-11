@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Nouveau carnet - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="admin-form-container">
+    <div class="admin-form-header">
+        <h2>➕ Nouveau carnet dans "{{ category.nom }}"</h2>
+        <a href="{{ url_for('carnets_categorie', menu_id=menu_id, categorie=categorie) }}" class="btn btn-secondary">← Retour à la catégorie</a>
+    </div>
+    
+    <form method="POST" action="{{ url_for('admin_create_carnet', menu_id=menu_id, categorie=categorie) }}" enctype="multipart/form-data" class="admin-form">
+        <div class="form-section">
+            <h3>Informations du carnet</h3>
+            
+            <div class="form-group">
+                <label for="titre">Titre du carnet *</label>
+                <input type="text" id="titre" name="titre" required>
+                <small>Le titre principal du carnet</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="description_courte">Description courte *</label>
+                <textarea id="description_courte" name="description_courte" rows="3" required></textarea>
+                <small>Une brève description qui apparaîtra sur la carte</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="description_complete">Description complète *</label>
+                <textarea id="description_complete" name="description_complete" rows="6" required></textarea>
+                <small>La description détaillée du carnet</small>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Image du carnet</h3>
+            
+            <div class="form-group">
+                <label for="image_file">Image du carnet *</label>
+                <input type="file" id="image_file" name="image_file" accept=".png,.jpg,.jpeg,.gif,.webp" required>
+                <small>Formats acceptés : PNG, JPG, JPEG, GIF, WEBP (max 10MB)</small>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Étapes du carnet</h3>
+            <div id="etapes-container">
+                <div class="etape-item">
+                    <div class="form-group">
+                        <label>Titre de l'étape 1</label>
+                        <input type="text" name="etapes[0][titre]" placeholder="Ex: Introduction">
+                    </div>
+                    <div class="form-group">
+                        <label>Description de l'étape 1</label>
+                        <textarea name="etapes[0][description]" rows="3" placeholder="Description de cette étape"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Durée de l'étape 1</label>
+                        <input type="text" name="etapes[0][duree]" placeholder="Ex: 30 minutes">
+                    </div>
+                    <div class="form-group">
+                        <label>Adresse de l'étape 1</label>
+                        <input type="text" name="etapes[0][adresse]" placeholder="Ex: 123 Rue de la Paix, Paris">
+                    </div>
+                    <div class="form-group">
+                        <label>Métro de l'étape 1</label>
+                        <input type="text" name="etapes[0][metro]" placeholder="Ex: Métro République">
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="add-etape" class="btn btn-secondary">+ Ajouter une étape</button>
+        </div>
+        
+        <div class="form-section">
+            <h3>Conseils</h3>
+            <div id="conseils-container">
+                <div class="conseil-item">
+                    <div class="form-group">
+                        <label>Conseil 1</label>
+                        <textarea name="conseils[0]" rows="2" placeholder="Un conseil utile pour ce carnet"></textarea>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="add-conseil" class="btn btn-secondary">+ Ajouter un conseil</button>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Créer le carnet</button>
+            <a href="{{ url_for('carnets_categorie', menu_id=menu_id, categorie=categorie) }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+let etapeIndex = 1;
+let conseilIndex = 1;
+
+document.getElementById('add-etape').addEventListener('click', function() {
+    const container = document.getElementById('etapes-container');
+    const newEtape = document.createElement('div');
+    newEtape.className = 'etape-item';
+    newEtape.innerHTML = `
+        <div class="form-group">
+            <label>Titre de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][titre]" placeholder="Ex: Introduction">
+        </div>
+        <div class="form-group">
+            <label>Description de l'étape ${etapeIndex + 1}</label>
+            <textarea name="etapes[${etapeIndex}][description]" rows="3" placeholder="Description de cette étape"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Durée de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][duree]" placeholder="Ex: 30 minutes">
+        </div>
+        <div class="form-group">
+            <label>Adresse de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][adresse]" placeholder="Ex: 123 Rue de la Paix, Paris">
+        </div>
+        <div class="form-group">
+            <label>Métro de l'étape ${etapeIndex + 1}</label>
+            <input type="text" name="etapes[${etapeIndex}][metro]" placeholder="Ex: Métro République">
+        </div>
+        <button type="button" class="btn btn-small btn-delete remove-etape">🗑️ Supprimer cette étape</button>
+    `;
+    container.appendChild(newEtape);
+    etapeIndex++;
+    
+    newEtape.querySelector('.remove-etape').addEventListener('click', function() {
+        container.removeChild(newEtape);
+    });
+});
+
+document.getElementById('add-conseil').addEventListener('click', function() {
+    const container = document.getElementById('conseils-container');
+    const newConseil = document.createElement('div');
+    newConseil.className = 'conseil-item';
+    newConseil.innerHTML = `
+        <div class="form-group">
+            <label>Conseil ${conseilIndex + 1}</label>
+            <textarea name="conseils[${conseilIndex}]" rows="2" placeholder="Un conseil utile pour ce carnet"></textarea>
+        </div>
+        <button type="button" class="btn btn-small btn-delete remove-conseil">🗑️ Supprimer ce conseil</button>
+    `;
+    container.appendChild(newConseil);
+    conseilIndex++;
+    
+    newConseil.querySelector('.remove-conseil').addEventListener('click', function() {
+        container.removeChild(newConseil);
+    });
+});
+</script>
+{% endblock %} 

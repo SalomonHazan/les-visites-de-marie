@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}{{ carnet.titre }} - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-nav">
+        <a href="{{ url_for('menu_page', menu_id=menu_id) }}" class="breadcrumb-link">
+            ← Retour aux carnets
+        </a>
+        <span class="breadcrumb-separator">›</span>
+        <a href="{{ url_for('carnets_categorie', menu_id=menu_id, categorie=categorie) }}" class="breadcrumb-link">
+            {{ categorie.replace('_', ' ').title() }}
+        </a>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-current">{{ carnet.titre }}</span>
+    </nav>
+
+    <!-- En-tête du carnet -->
+    <div class="carnet-header">
+        <div class="carnet-image-large">
+            {% if carnet.image_url %}
+                <img src="{{ url_for('static', filename=carnet.image_url) if carnet.image_url.startswith('uploads/') else carnet.image_url }}" alt="{{ carnet.titre }}">
+            {% else %}
+                <div class="no-image-large">📄</div>
+            {% endif %}
+        </div>
+        
+        <div class="carnet-info">
+            <h1>{{ carnet.titre }}</h1>
+            <div class="carnet-meta">
+                <span class="date">{{ carnet.date_creation[:10] if carnet.date_creation else 'Date inconnue' }}</span>
+                <span class="etapes-count">{{ carnet.etapes|length }} étape{{ 's' if carnet.etapes|length > 1 else '' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description complète -->
+    <div class="carnet-description-complete">
+        <h2>Description</h2>
+        <p>{{ carnet.description_complete }}</p>
+    </div>
+
+    <!-- Étapes du carnet -->
+    {% if carnet.etapes %}
+        <div class="etapes-section">
+            <h2>Étapes du carnet</h2>
+            {% for etape in carnet.etapes %}
+                <div class="etape">
+                    <div class="etape-numero">{{ loop.index }}</div>
+                    <div class="etape-content">
+                        <h3>{{ etape.titre }}</h3>
+                        <p>{{ etape.description }}</p>
+                        
+                        <div class="etape-details">
+                            <div class="etape-duree">
+                                <strong>Durée :</strong> {{ etape.duree }}
+                            </div>
+                            
+                            {% if etape.adresse %}
+                                <div class="etape-adresse">
+                                    <div class="etape-info">
+                                        <strong>📍 Adresse :</strong> {{ etape.adresse }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if etape.metro %}
+                                <div class="etape-metro">
+                                    <div class="etape-info">
+                                        <strong>🚇 Métro :</strong> {{ etape.metro }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Conseils -->
+    {% if carnet.conseils %}
+        <div class="conseils-section">
+            <h2>Conseils</h2>
+            <div class="conseils-list">
+                {% for conseil in carnet.conseils %}
+                    <div class="conseil-item">
+                        <div class="conseil-icon">💡</div>
+                        <div class="conseil-text">{{ conseil }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Actions admin -->
+    {% if session.admin_logged_in %}
+        <div class="admin-actions">
+            <a href="{{ url_for('admin_edit_carnet_page', menu_id=menu_id, categorie=categorie, carnet_id=carnet.id) }}" class="btn btn-edit">
+                ✏️ Modifier ce carnet
+            </a>
+            <a href="{{ url_for('admin_delete_carnet', menu_id=menu_id, categorie=categorie, carnet_id=carnet.id) }}" class="btn btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce carnet ?')">
+                🗑️ Supprimer ce carnet
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

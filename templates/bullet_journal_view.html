@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}{{ journal.title|default('Bullet Journal') }} - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="bullet-journal-container">
+    <div class="bullet-journal-header">
+        <div class="journal-info">
+            <h1>{{ journal.title|default('Bullet Journal') }}</h1>
+            <p class="journal-description">{{ journal.description|default('Votre journal personnel') }}</p>
+        </div>
+        
+        <div class="journal-actions">
+            <a href="{{ url_for('bullet_journal_new_page', journal_id=journal_id) }}" class="btn btn-primary">
+                ➕ Ajouter une page
+            </a>
+        </div>
+    </div>
+
+    <div class="pages-grid">
+        {% if journal.pages %}
+            {% for page in journal.pages %}
+                <div class="page-card">
+                    <div class="page-preview">
+                        <div class="page-template-icon">
+                            {% if page.template == 'blank' %}📄
+                            {% elif page.template == 'lined' %}📝
+                            {% elif page.template == 'grid' %}📊
+                            {% elif page.template == 'dots' %}🔘
+                            {% else %}📄
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="page-info">
+                        <h3>{{ page.title }}</h3>
+                        <p class="page-date">{{ page.created_at[:10] }}</p>
+                        <p class="page-elements">{{ page.elements|length }} éléments</p>
+                    </div>
+                    
+                    <div class="page-actions">
+                        <a href="{{ url_for('bullet_journal_page_edit', journal_id=journal_id, page_id=page.id) }}" class="btn btn-secondary">
+                            Éditer
+                        </a>
+                        <a href="{{ url_for('bullet_journal_export_page', journal_id=journal_id, page_id=page.id) }}" class="btn btn-small">
+                            📄 Export
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-pages">
+                <p>Aucune page dans ce journal.</p>
+                <a href="{{ url_for('bullet_journal_new_page', journal_id=journal_id) }}" class="btn btn-primary">
+                    Créer votre première page
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.bullet-journal-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.bullet-journal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding: 25px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.journal-info h1 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 2.5em;
+}
+
+.journal-description {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.journal-actions {
+    text-align: right;
+}
+
+.pages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.page-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #f8f9fa;
+}
+
+.page-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.page-preview {
+    height: 150px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.page-template-icon {
+    font-size: 3em;
+    color: #7f8c8d;
+}
+
+.page-info {
+    padding: 20px;
+}
+
+.page-info h3 {
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-size: 1.3em;
+}
+
+.page-date, .page-elements {
+    color: #7f8c8d;
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.page-actions {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #229954;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.btn-small {
+    background: #95a5a6;
+    color: white;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-small:hover {
+    background: #7f8c8d;
+}
+
+.no-pages {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.no-pages p {
+    color: #7f8c8d;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .bullet-journal-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .pages-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .page-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+
+
+

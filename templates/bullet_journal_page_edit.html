@@ -1,0 +1,1265 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} - {{ config.site_title }}{% endblock %}
+
+{% block content %}
+<div class="page-editor-container">
+    <div class="editor-header">
+        <div class="page-info">
+            <h1>{{ page.title }}</h1>
+            <p class="template-info">Template: {{ templates[page.template].name if page.template in templates else 'Inconnu' }}</p>
+        </div>
+        
+        <div class="editor-actions">
+            <button id="saveBtn" class="btn btn-primary">💾 Sauvegarder</button>
+            <a href="{{ url_for('bullet_journal_export_page', journal_id=journal_id, page_id=page_id) }}" class="btn btn-secondary">📄 Export</a>
+            <a href="{{ url_for('bullet_journal_view', journal_id=journal_id) }}" class="btn btn-small">← Retour</a>
+        </div>
+    </div>
+
+    <div class="editor-main">
+        <div class="toolbar">
+            <div class="tool-group">
+                <button class="tool-btn" data-tool="text" title="Texte">
+                    <span class="tool-icon">📝</span>
+                    <span class="tool-label">Texte</span>
+                </button>
+                <button class="tool-btn" data-tool="checkbox" title="Checkbox">
+                    <span class="tool-icon">☐</span>
+                    <span class="tool-label">Liste</span>
+                </button>
+                <button class="tool-btn" data-tool="drawing" title="Dessin">
+                    <span class="tool-icon">✏️</span>
+                    <span class="tool-label">Dessin</span>
+                </button>
+                <button class="tool-btn" data-tool="image" title="Image">
+                    <span class="tool-icon">🖼️</span>
+                    <span class="tool-label">Image</span>
+                </button>
+                <button class="tool-btn" data-tool="sticker" title="Sticker">
+                    <span class="tool-icon">⭐</span>
+                    <span class="tool-label">Sticker</span>
+                </button>
+            </div>
+            
+            <div class="tool-group">
+                <select id="fontFamily" class="style-control">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Verdana">Verdana</option>
+                </select>
+                
+                <select id="fontSize" class="style-control">
+                    <option value="12px">12px</option>
+                    <option value="14px">14px</option>
+                    <option value="16px" selected>16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                    <option value="24px">24px</option>
+                </select>
+                
+                <input type="color" id="textColor" value="#2c3e50" class="style-control">
+                
+                <button id="boldBtn" class="style-btn" title="Gras">B</button>
+                <button id="italicBtn" class="style-btn" title="Italique">I</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <div id="pageCanvas" class="page-canvas template-{{ page.template }}">
+                <!-- Les éléments de la page seront rendus ici -->
+            </div>
+        </div>
+        
+        <!-- Canvas pour le dessin -->
+        <canvas id="drawingCanvas" style="display: none; position: absolute; top: 0; left: 0; z-index: 10;"></canvas>
+    </div>
+
+    <!-- Modales -->
+    <div id="textModal" class="modal">
+        <div class="modal-content">
+            <h3>Ajouter du texte</h3>
+            <textarea id="textInput" placeholder="Entrez votre texte..."></textarea>
+            <div class="modal-actions">
+                <button id="addTextBtn" class="btn btn-primary">Ajouter</button>
+                <button class="btn btn-secondary modal-close">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkboxModal" class="modal">
+        <div class="modal-content">
+            <h3>Ajouter une liste à cocher</h3>
+            <textarea id="checkboxInput" placeholder="Entrez le texte de votre liste..."></textarea>
+            <div class="modal-actions">
+                <button id="addCheckboxBtn" class="btn btn-primary">Ajouter</button>
+                <button class="btn btn-secondary modal-close">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <h3>Ajouter une image</h3>
+            <input type="file" id="imageInput" accept="image/*">
+            <div class="modal-actions">
+                <button id="addImageBtn" class="btn btn-primary">Ajouter</button>
+                <button class="btn btn-secondary modal-close">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stickerModal" class="modal">
+        <div class="modal-content">
+            <h3>Bibliothèque de stickers</h3>
+            <div class="stickers-grid">
+                {% for sticker in media_library.stickers %}
+                    <div class="sticker-item" data-sticker-url="{{ sticker.url }}">
+                        <img src="{{ sticker.url }}" alt="{{ sticker.name }}">
+                        <span>{{ sticker.name }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary modal-close">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-editor-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-info h1 {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-size: 1.8em;
+}
+
+.template-info {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.editor-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.editor-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    gap: 20px;
+}
+
+.tool-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.tool-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 60px;
+}
+
+.tool-btn:hover {
+    background: #f8f9fa;
+    border-color: #3498db;
+}
+
+.tool-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.tool-icon {
+    font-size: 1.2em;
+    margin-bottom: 2px;
+}
+
+.tool-label {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.style-control {
+    padding: 6px 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.style-btn {
+    padding: 6px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.style-btn:hover {
+    background: #f8f9fa;
+}
+
+.style-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.canvas-container {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.page-canvas {
+    width: 800px;
+    height: 1000px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    cursor: crosshair;
+    overflow: hidden;
+}
+
+.template-blank {
+    background: white;
+}
+
+.template-lined {
+    background: linear-gradient(0deg, transparent 0%, transparent 24px, #e0e0e0 24px, #e0e0e0 25px, transparent 25px);
+    background-size: 100% 25px;
+}
+
+.template-grid {
+    background-image: 
+        linear-gradient(#e0e0e0 1px, transparent 1px),
+        linear-gradient(90deg, #e0e0e0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.template-dots {
+    background-image: radial-gradient(circle, #e0e0e0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+}
+
+.modal-content textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.stickers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.sticker-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sticker-item:hover {
+    border-color: #3498db;
+    background: #f8f9fa;
+}
+
+.sticker-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 8px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.sticker-item:hover img {
+    border-color: #3498db;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.sticker-item span {
+    font-size: 0.8em;
+    text-align: center;
+    color: #7f8c8d;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #229954;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+.btn-small {
+    background: #7f8c8d;
+    color: white;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-small:hover {
+    background: #6c7b7d;
+}
+
+/* Éléments de la page */
+.page-element {
+    position: absolute;
+    cursor: move;
+    user-select: none;
+}
+
+.page-element.selected {
+    outline: 2px solid #3498db;
+}
+
+.text-element {
+    min-width: 100px;
+    min-height: 20px;
+    padding: 5px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.text-element:hover {
+    border-color: #e0e0e0;
+}
+
+.text-element.selected {
+    border-color: #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.text-element .text-content {
+    outline: none;
+    min-height: 1em;
+    word-wrap: break-word;
+}
+
+.text-element .text-content:focus {
+    background-color: rgba(52, 152, 219, 0.05);
+    border-radius: 2px;
+}
+
+.checkbox-element {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    min-width: 150px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.checkbox-element:hover {
+    border-color: #e0e0e0;
+}
+
+.checkbox-element.selected {
+    border-color: #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.checkbox-element input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkbox-element span {
+    flex: 1;
+    cursor: text;
+    outline: none;
+    min-height: 1em;
+    word-wrap: break-word;
+}
+
+.checkbox-element span:focus {
+    background-color: rgba(52, 152, 219, 0.05);
+    border-radius: 2px;
+}
+
+.drawing-element {
+    border: 1px solid #e0e0e0;
+    background: white;
+}
+
+.image-element {
+    max-width: 200px;
+    max-height: 200px;
+}
+
+.image-element img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.sticker-element {
+    width: 60px;
+    height: 60px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: move;
+}
+
+.sticker-element:hover {
+    border-color: #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.sticker-element.selected {
+    border-color: #3498db;
+    background-color: rgba(52, 152, 219, 0.2);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+.sticker-element img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+}
+
+@media (max-width: 768px) {
+    .editor-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .toolbar {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .tool-group {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .page-canvas {
+        width: 100%;
+        height: 600px;
+    }
+}
+</style>
+
+<script>
+// Données de la page
+let pageData = {
+    title: "{{ page.title }}",
+    elements: {{ page.elements|tojson|safe }}
+};
+
+let selectedElement = null;
+let currentTool = null;
+let isDrawing = false;
+let drawingPaths = [];
+let isDragging = false;
+let dragOffset = { x: 0, y: 0 };
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    renderPage();
+    setupEventListeners();
+    setupDrawingCanvas();
+});
+
+function setupEventListeners() {
+    // Boutons d'outils
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tool = this.dataset.tool;
+            setCurrentTool(tool);
+        });
+    });
+
+    // Contrôles de style
+    document.getElementById('fontFamily').addEventListener('change', updateSelectedElementStyle);
+    document.getElementById('fontSize').addEventListener('change', updateSelectedElementStyle);
+    document.getElementById('textColor').addEventListener('change', updateSelectedElementStyle);
+    document.getElementById('boldBtn').addEventListener('click', function() {
+        this.classList.toggle('active');
+        updateSelectedElementStyle();
+    });
+    document.getElementById('italicBtn').addEventListener('click', function() {
+        this.classList.toggle('active');
+        updateSelectedElementStyle();
+    });
+
+    // Sauvegarde
+    document.getElementById('saveBtn').addEventListener('click', savePage);
+
+    // Modales
+    setupModals();
+    
+    // Glisser-déposer
+    setupDragAndDrop();
+}
+
+function setCurrentTool(tool) {
+    currentTool = tool;
+    
+    // Mettre à jour l'interface
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
+    
+    // Configurer le curseur
+    const canvas = document.getElementById('pageCanvas');
+    if (tool === 'drawing') {
+        canvas.style.cursor = 'crosshair';
+        setupDrawingMode();
+    } else {
+        canvas.style.cursor = 'default';
+        disableDrawingMode();
+    }
+}
+
+function setupDrawingMode() {
+    const canvas = document.getElementById('pageCanvas');
+    const drawingCanvas = document.getElementById('drawingCanvas');
+    
+    drawingCanvas.style.display = 'block';
+    drawingCanvas.width = canvas.offsetWidth;
+    drawingCanvas.height = canvas.offsetHeight;
+    drawingCanvas.style.left = canvas.offsetLeft + 'px';
+    drawingCanvas.style.top = canvas.offsetTop + 'px';
+    
+    const ctx = drawingCanvas.getContext('2d');
+    ctx.strokeStyle = document.getElementById('textColor').value;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    
+    drawingCanvas.addEventListener('mousedown', startDrawing);
+    drawingCanvas.addEventListener('mousemove', draw);
+    drawingCanvas.addEventListener('mouseup', stopDrawing);
+}
+
+function disableDrawingMode() {
+    const drawingCanvas = document.getElementById('drawingCanvas');
+    drawingCanvas.style.display = 'none';
+    drawingCanvas.removeEventListener('mousedown', startDrawing);
+    drawingCanvas.removeEventListener('mousemove', draw);
+    drawingCanvas.removeEventListener('mouseup', stopDrawing);
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const ctx = e.target.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    
+    // Créer un nouveau chemin de dessin
+    const newPath = {
+        points: [[x, y]],
+        color: document.getElementById('textColor').value,
+        width: 2
+    };
+    
+    drawingPaths.push(newPath);
+    console.log('Nouveau chemin de dessin créé:', newPath);
+    
+    // Créer un élément de dessin si c'est le premier trait
+    if (drawingPaths.length === 1) {
+        createDrawingElement();
+    }
+}
+
+function createDrawingElement() {
+    const drawingElement = {
+        id: 'element_' + Date.now(),
+        type: 'drawing',
+        position: { x: 50, y: 50 },
+        width: 300,
+        height: 200,
+        paths: []
+    };
+    
+    pageData.elements.push(drawingElement);
+    console.log('Élément de dessin créé:', drawingElement);
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const ctx = e.target.getContext('2d');
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    
+    if (drawingPaths.length > 0) {
+        drawingPaths[drawingPaths.length - 1].points.push([x, y]);
+        console.log('Point ajouté au dessin:', [x, y]);
+    }
+}
+
+function stopDrawing() {
+    isDrawing = false;
+    
+    // Mettre à jour l'élément de dessin dans les données
+    if (drawingPaths.length > 0) {
+        const drawingElement = pageData.elements.find(el => el.type === 'drawing');
+        if (drawingElement) {
+            drawingElement.paths = [...drawingPaths];
+            console.log('Élément de dessin mis à jour:', drawingElement);
+        }
+    }
+}
+
+function setupDrawingCanvas() {
+    const canvas = document.getElementById('pageCanvas');
+    const drawingCanvas = document.getElementById('drawingCanvas');
+    
+    // Positionner le canvas de dessin par rapport au canvas de la page
+    function updateDrawingCanvasPosition() {
+        const rect = canvas.getBoundingClientRect();
+        drawingCanvas.style.left = rect.left + 'px';
+        drawingCanvas.style.top = rect.top + 'px';
+        drawingCanvas.width = canvas.offsetWidth;
+        drawingCanvas.height = canvas.offsetHeight;
+    }
+    
+    updateDrawingCanvasPosition();
+    window.addEventListener('resize', updateDrawingCanvasPosition);
+}
+
+function setupDragAndDrop() {
+    const canvas = document.getElementById('pageCanvas');
+    
+    canvas.addEventListener('mousedown', function(e) {
+        const element = e.target.closest('.page-element');
+        if (element && currentTool !== 'drawing') {
+            isDragging = true;
+            selectedElement = element;
+            selectElement(element);
+            
+            const rect = element.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (isDragging && selectedElement) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const newX = e.clientX - canvasRect.left - dragOffset.x;
+            const newY = e.clientY - canvasRect.top - dragOffset.y;
+            
+            // Limiter aux limites du canvas
+            const maxX = canvas.offsetWidth - selectedElement.offsetWidth;
+            const maxY = canvas.offsetHeight - selectedElement.offsetHeight;
+            
+            const finalX = Math.max(0, Math.min(newX, maxX));
+            const finalY = Math.max(0, Math.min(newY, maxY));
+            
+            selectedElement.style.left = finalX + 'px';
+            selectedElement.style.top = finalY + 'px';
+            
+            // Mettre à jour les données en temps réel
+            updateElementInData(selectedElement.id, 'position', { x: finalX, y: finalY });
+        }
+    });
+    
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+}
+
+function updateSelectedElementStyle() {
+    if (!selectedElement) return;
+    
+    const fontFamily = document.getElementById('fontFamily').value;
+    const fontSize = document.getElementById('fontSize').value;
+    const color = document.getElementById('textColor').value;
+    const isBold = document.getElementById('boldBtn').classList.contains('active');
+    const isItalic = document.getElementById('italicBtn').classList.contains('active');
+    
+    selectedElement.style.fontFamily = fontFamily;
+    selectedElement.style.fontSize = fontSize;
+    selectedElement.style.color = color;
+    selectedElement.style.fontWeight = isBold ? 'bold' : 'normal';
+    selectedElement.style.fontStyle = isItalic ? 'italic' : 'normal';
+    
+    // Mettre à jour les données
+    const elementId = selectedElement.id;
+    updateElementInData(elementId, 'style', {
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        color: color,
+        fontWeight: isBold ? 'bold' : 'normal',
+        fontStyle: isItalic ? 'italic' : 'normal'
+    });
+}
+
+function updateElementInData(elementId, property, value) {
+    const element = pageData.elements.find(el => el.id === elementId);
+    if (element) {
+        element[property] = value;
+        console.log('Élément mis à jour:', elementId, property, value);
+    }
+}
+
+function renderPage() {
+    const canvas = document.getElementById('pageCanvas');
+    canvas.innerHTML = '';
+    
+    pageData.elements.forEach(element => {
+        const elementEl = createElement(element);
+        canvas.appendChild(elementEl);
+    });
+}
+
+function createElement(elementData) {
+    const element = document.createElement('div');
+    element.className = `page-element ${elementData.type}-element`;
+    element.id = elementData.id;
+    element.style.left = elementData.position.x + 'px';
+    element.style.top = elementData.position.y + 'px';
+    
+    switch (elementData.type) {
+        case 'text':
+            element.innerHTML = `<div class="text-content" contenteditable="true" data-element-id="${elementData.id}">${elementData.content}</div>`;
+            if (elementData.style) {
+                element.style.fontFamily = elementData.style.fontFamily || 'Arial';
+                element.style.fontSize = elementData.style.fontSize || '16px';
+                element.style.color = elementData.style.color || '#2c3e50';
+                element.style.fontWeight = elementData.style.fontWeight || 'normal';
+                element.style.fontStyle = elementData.style.fontStyle || 'normal';
+            }
+            
+            // Événements pour la modification du texte
+            const textContent = element.querySelector('.text-content');
+            textContent.addEventListener('input', function() {
+                updateElementInData(elementData.id, 'content', this.textContent);
+            });
+            textContent.addEventListener('blur', function() {
+                updateElementInData(elementData.id, 'content', this.textContent);
+            });
+            break;
+            
+        case 'checkbox':
+            element.innerHTML = `
+                <input type="checkbox" ${elementData.checked ? 'checked' : ''} data-element-id="${elementData.id}">
+                <span contenteditable="true" data-element-id="${elementData.id}">${elementData.content}</span>
+            `;
+            if (elementData.style) {
+                element.style.fontFamily = elementData.style.fontFamily || 'Arial';
+                element.style.fontSize = elementData.style.fontSize || '16px';
+                element.style.color = elementData.style.color || '#2c3e50';
+            }
+            
+            // Événements pour la modification du texte et de l'état
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            const checkboxText = element.querySelector('span');
+            
+            checkbox.addEventListener('change', function() {
+                updateElementInData(elementData.id, 'checked', this.checked);
+            });
+            
+            checkboxText.addEventListener('input', function() {
+                updateElementInData(elementData.id, 'content', this.textContent);
+            });
+            checkboxText.addEventListener('blur', function() {
+                updateElementInData(elementData.id, 'content', this.textContent);
+            });
+            break;
+            
+        case 'image':
+            element.innerHTML = `<img src="${elementData.url}" alt="Image">`;
+            element.style.width = (elementData.width || 200) + 'px';
+            element.style.height = (elementData.height || 200) + 'px';
+            break;
+            
+        case 'sticker':
+            element.innerHTML = `<img src="${elementData.url}" alt="Sticker">`;
+            break;
+            
+        case 'drawing':
+            const canvas = document.createElement('canvas');
+            canvas.width = elementData.width || 300;
+            canvas.height = elementData.height || 200;
+            element.appendChild(canvas);
+            element.style.width = (elementData.width || 300) + 'px';
+            element.style.height = (elementData.height || 200) + 'px';
+            if (elementData.paths) {
+                renderDrawing(canvas, elementData.paths);
+            }
+            break;
+    }
+    
+    // Événements de sélection
+    element.addEventListener('click', function(e) {
+        e.stopPropagation();
+        selectElement(this);
+        updateStyleControls();
+    });
+    
+    return element;
+}
+
+function selectElement(element) {
+    if (selectedElement) {
+        selectedElement.classList.remove('selected');
+    }
+    selectedElement = element;
+    element.classList.add('selected');
+}
+
+function updateStyleControls() {
+    if (!selectedElement) return;
+    
+    const fontFamily = selectedElement.style.fontFamily || 'Arial';
+    const fontSize = selectedElement.style.fontSize || '16px';
+    const color = selectedElement.style.color || '#2c3e50';
+    const fontWeight = selectedElement.style.fontWeight || 'normal';
+    const fontStyle = selectedElement.style.fontStyle || 'normal';
+    
+    document.getElementById('fontFamily').value = fontFamily;
+    document.getElementById('fontSize').value = fontSize;
+    document.getElementById('textColor').value = color;
+    document.getElementById('boldBtn').classList.toggle('active', fontWeight === 'bold');
+    document.getElementById('italicBtn').classList.toggle('active', fontStyle === 'italic');
+}
+
+function setupModals() {
+    // Modal de texte
+    document.querySelector('[data-tool="text"]').addEventListener('click', function() {
+        document.getElementById('textModal').style.display = 'block';
+    });
+    
+    document.getElementById('addTextBtn').addEventListener('click', function() {
+        const text = document.getElementById('textInput').value;
+        if (text.trim()) {
+            addTextElement(text);
+            document.getElementById('textModal').style.display = 'none';
+            document.getElementById('textInput').value = '';
+        }
+    });
+    
+    // Modal de checkbox
+    document.querySelector('[data-tool="checkbox"]').addEventListener('click', function() {
+        document.getElementById('checkboxModal').style.display = 'block';
+    });
+    
+    document.getElementById('addCheckboxBtn').addEventListener('click', function() {
+        const text = document.getElementById('checkboxInput').value;
+        if (text.trim()) {
+            addCheckboxElement(text);
+            document.getElementById('checkboxModal').style.display = 'none';
+            document.getElementById('checkboxInput').value = '';
+        }
+    });
+    
+    // Modal d'image
+    document.querySelector('[data-tool="image"]').addEventListener('click', function() {
+        document.getElementById('imageModal').style.display = 'block';
+    });
+    
+    document.getElementById('addImageBtn').addEventListener('click', function() {
+        const fileInput = document.getElementById('imageInput');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                addImageElement(e.target.result);
+                document.getElementById('imageModal').style.display = 'none';
+                fileInput.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Modal de stickers
+    document.querySelector('[data-tool="sticker"]').addEventListener('click', function() {
+        document.getElementById('stickerModal').style.display = 'block';
+    });
+    
+    document.querySelectorAll('.sticker-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const url = this.dataset.stickerUrl;
+            addStickerElement(url);
+            document.getElementById('stickerModal').style.display = 'none';
+        });
+    });
+    
+    // Fermer les modales
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        });
+    });
+}
+
+function addTextElement(text) {
+    const element = {
+        id: 'element_' + Date.now(),
+        type: 'text',
+        content: text,
+        position: { x: 50, y: 50 },
+        style: {
+            fontFamily: document.getElementById('fontFamily').value,
+            fontSize: document.getElementById('fontSize').value,
+            color: document.getElementById('textColor').value,
+            fontWeight: document.getElementById('boldBtn').classList.contains('active') ? 'bold' : 'normal',
+            fontStyle: document.getElementById('italicBtn').classList.contains('active') ? 'italic' : 'normal'
+        }
+    };
+    
+    pageData.elements.push(element);
+    
+    // Ajouter l'élément sans re-rendre toute la page
+    const canvas = document.getElementById('pageCanvas');
+    const elementEl = createElement(element);
+    canvas.appendChild(elementEl);
+    
+    console.log('Texte ajouté:', element);
+}
+
+function addCheckboxElement(text) {
+    const element = {
+        id: 'element_' + Date.now(),
+        type: 'checkbox',
+        content: text,
+        checked: false,
+        position: { x: 50, y: 50 },
+        style: {
+            fontFamily: document.getElementById('fontFamily').value,
+            fontSize: document.getElementById('fontSize').value,
+            color: document.getElementById('textColor').value
+        }
+    };
+    
+    pageData.elements.push(element);
+    
+    // Ajouter l'élément sans re-rendre toute la page
+    const canvas = document.getElementById('pageCanvas');
+    const elementEl = createElement(element);
+    canvas.appendChild(elementEl);
+    
+    console.log('Checkbox ajouté:', element);
+}
+
+function addImageElement(url) {
+    const element = {
+        id: 'element_' + Date.now(),
+        type: 'image',
+        url: url,
+        position: { x: 50, y: 50 },
+        width: 200,
+        height: 200
+    };
+    
+    pageData.elements.push(element);
+    
+    // Ajouter l'élément sans re-rendre toute la page
+    const canvas = document.getElementById('pageCanvas');
+    const elementEl = createElement(element);
+    canvas.appendChild(elementEl);
+    
+    console.log('Image ajoutée:', element);
+}
+
+function addStickerElement(url) {
+    const element = {
+        id: 'element_' + Date.now(),
+        type: 'sticker',
+        url: url,
+        position: { x: 50, y: 50 }
+    };
+    
+    pageData.elements.push(element);
+    
+    // Ajouter l'élément sans re-rendre toute la page
+    const canvas = document.getElementById('pageCanvas');
+    const elementEl = createElement(element);
+    canvas.appendChild(elementEl);
+    
+    console.log('Sticker ajouté:', element);
+}
+
+function renderDrawing(canvas, paths) {
+    if (!paths || paths.length === 0) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    paths.forEach(path => {
+        if (path.points && path.points.length > 0) {
+            ctx.strokeStyle = path.color || '#000000';
+            ctx.lineWidth = path.width || 2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            
+            path.points.forEach((point, index) => {
+                if (index === 0) {
+                    ctx.moveTo(point[0], point[1]);
+                } else {
+                    ctx.lineTo(point[0], point[1]);
+                }
+            });
+            ctx.stroke();
+        }
+    });
+    
+    console.log('Dessin rendu avec', paths.length, 'chemins');
+}
+
+function savePage() {
+    // Collecter les données actuelles depuis les éléments visuels
+    const updatedElements = [];
+    document.querySelectorAll('.page-element').forEach(element => {
+        // Déterminer le type correct en fonction des classes CSS
+        let elementType = '';
+        if (element.classList.contains('text-element')) elementType = 'text';
+        else if (element.classList.contains('checkbox-element')) elementType = 'checkbox';
+        else if (element.classList.contains('image-element')) elementType = 'image';
+        else if (element.classList.contains('sticker-element')) elementType = 'sticker';
+        else if (element.classList.contains('drawing-element')) elementType = 'drawing';
+        else {
+            console.warn('Type d\'élément non reconnu:', element.className);
+            return; // Ignorer cet élément
+        }
+        
+        const elementData = {
+            id: element.id,
+            type: elementType,
+            position: {
+                x: parseInt(element.style.left) || 0,
+                y: parseInt(element.style.top) || 0
+            }
+        };
+        
+        switch (elementType) {
+            case 'text':
+                const textContent = element.querySelector('.text-content');
+                elementData.content = textContent ? textContent.textContent : '';
+                elementData.style = {
+                    fontFamily: element.style.fontFamily || 'Arial',
+                    fontSize: element.style.fontSize || '16px',
+                    color: element.style.color || '#2c3e50',
+                    fontWeight: element.style.fontWeight || 'normal',
+                    fontStyle: element.style.fontStyle || 'normal'
+                };
+                break;
+                
+            case 'checkbox':
+                const checkbox = element.querySelector('input[type="checkbox"]');
+                const checkboxText = element.querySelector('span');
+                elementData.content = checkboxText ? checkboxText.textContent : '';
+                elementData.checked = checkbox ? checkbox.checked : false;
+                elementData.style = {
+                    fontFamily: element.style.fontFamily || 'Arial',
+                    fontSize: element.style.fontSize || '16px',
+                    color: element.style.color || '#2c3e50'
+                };
+                break;
+                
+            case 'image':
+                const img = element.querySelector('img');
+                elementData.url = img ? img.src : '';
+                elementData.width = parseInt(element.style.width) || 200;
+                elementData.height = parseInt(element.style.height) || 200;
+                break;
+                
+            case 'sticker':
+                const stickerImg = element.querySelector('img');
+                elementData.url = stickerImg ? stickerImg.src : '';
+                break;
+                
+            case 'drawing':
+                elementData.width = parseInt(element.style.width) || 300;
+                elementData.height = parseInt(element.style.height) || 200;
+                // Mettre à jour les chemins de dessin avec les données actuelles
+                elementData.paths = drawingPaths;
+                console.log('Données de dessin sauvegardées:', elementData);
+                break;
+        }
+        
+        console.log('Élément collecté:', elementData);
+        updatedElements.push(elementData);
+    });
+    
+    // Mettre à jour les données de la page
+    pageData.elements = updatedElements;
+    
+    console.log('Données à sauvegarder:', pageData);
+    
+    // Envoyer au serveur
+    fetch('{{ url_for("bullet_journal_save_page", journal_id=journal_id, page_id=page_id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pageData)
+    })
+    .then(response => {
+        console.log('Réponse du serveur:', response);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Données reçues:', data);
+        if (data.success) {
+            alert('Page sauvegardée avec succès !');
+        } else {
+            alert('Erreur lors de la sauvegarde: ' + (data.message || 'Erreur inconnue'));
+        }
+    })
+    .catch(error => {
+        console.error('Erreur lors de la sauvegarde:', error);
+        alert('Erreur lors de la sauvegarde: ' + error.message);
+    });
+}
+
+// Fermer les modales en cliquant à l'extérieur
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
+
+// Désélectionner en cliquant sur le canvas
+document.getElementById('pageCanvas').addEventListener('click', function(e) {
+    if (e.target === this) {
+        if (selectedElement) {
+            selectedElement.classList.remove('selected');
+            selectedElement = null;
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ categorie_titre }} - Les Visites de Marie{% endblock %}
+
+{% block content %}
+<div class="carnets-categorie-page">
+    <div class="page-header">
+        <div class="breadcrumb">
+            <a href="{{ url_for('menu_page', menu_id='cultures') }}" class="breadcrumb-link">
+                ← Retour aux cultures
+            </a>
+        </div>
+        
+        <div class="categorie-header">
+            <div class="categorie-icon">{{ categorie_icon }}</div>
+            <div class="categorie-info">
+                <h1>{{ categorie_titre }}</h1>
+                <p class="categorie-description">{{ categorie_description }}</p>
+                
+                {% if session.admin_logged_in %}
+                    <div class="categorie-header-actions">
+                        <a href="{{ url_for('admin_edit_category_header', menu_id='cultures', category_id=categorie) }}" class="btn btn-small btn-edit" title="Modifier cette section">
+                            ✏️ Modifier cette section
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="categorie-stats">
+                <span class="page-count-total">{{ carnets|length }} page{{ 's' if carnets|length > 1 else '' }}</span>
+                
+                {% if session.admin_logged_in %}
+                    <div class="categorie-actions">
+                        <a href="{{ url_for('admin_new_carnet_culture_page', categorie=categorie) }}" class="btn btn-primary">
+                            ➕ Ajouter une page
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if carnets %}
+        <div class="carnets-grid">
+            {% for carnet in carnets %}
+                <div class="carnet-card">
+                    <div class="carnet-image">
+                        {% if carnet.image_url %}
+                            {% if carnet.image_url.startswith('http') %}
+                                <img src="{{ carnet.image_url }}" alt="{{ carnet.titre }}" loading="lazy">
+                            {% else %}
+                                <img src="{{ url_for('static', filename=carnet.image_url) }}" alt="{{ carnet.titre }}" loading="lazy">
+                            {% endif %}
+                        {% else %}
+                            <div class="no-image">{{ categorie_icon }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="carnet-content">
+                        <h4>{{ carnet.titre }}</h4>
+                        <p class="carnet-description">{{ carnet.description_courte }}</p>
+                        <div class="carnet-meta">
+                            <span class="etapes-count">{{ carnet.etapes|length }} étapes</span>
+                            <span class="date">{{ carnet.date_creation[:10] }}</span>
+                        </div>
+                        
+                        <div class="carnet-actions">
+                            <a href="{{ url_for('carnet_culture_detail', categorie=categorie, slug=carnet.id) }}" class="btn btn-carnet">Voir la page</a>
+                            
+                            {% if session.admin_logged_in %}
+                                <div class="card-admin-actions">
+                                    <a href="{{ url_for('admin_edit_carnet_culture_page', categorie=categorie, carnet_id=carnet.id) }}" class="btn btn-small btn-edit" title="Modifier">
+                                        ✏️
+                                    </a>
+                                    <a href="{{ url_for('admin_delete_carnet_culture', categorie=categorie, carnet_id=carnet.id) }}" class="btn btn-small btn-delete" title="Supprimer" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette page ?')">
+                                        🗑️
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-carnets">
+            <div class="no-carnets-content">
+                <div class="no-carnets-icon">{{ categorie_icon }}</div>
+                <h3>Aucune page disponible</h3>
+                <p>Il n'y a pas encore de pages dans cette catégorie.</p>
+                {% if session.admin_logged_in %}
+                    <a href="{{ url_for('admin_new_carnet_culture_page', categorie=categorie) }}" class="btn btn-primary">
+                        ➕ Ajouter une page
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

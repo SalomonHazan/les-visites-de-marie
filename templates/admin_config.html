@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration du site - Les Visites de Marie{% endblock %}
+
+{% block content %}
+    <div class="config-form">
+        <h2>Configuration du site</h2>
+        <p class="config-description">Modifiez le titre et le sous-titre du site qui apparaissent sur toutes les pages.</p>
+        
+        <form method="POST" action="{{ url_for('admin_update_config') }}" class="form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="site_title">Titre du site</label>
+                <input type="text" id="site_title" name="site_title" value="{{ config.site_title }}" required>
+                <small>Ce titre apparaît en haut de toutes les pages</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="site_subtitle">Sous-titre du site</label>
+                <textarea id="site_subtitle" name="site_subtitle" rows="3" required>{{ config.site_subtitle }}</textarea>
+                <small>Ce sous-titre apparaît sous le titre principal</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="admin_email">Email d'administration</label>
+                <input type="email" id="admin_email" name="admin_email" value="{{ config.admin_email }}" required>
+                <small>Email de contact pour l'administration</small>
+            </div>
+            
+            <div class="footer-config-section">
+                <h3>Configuration du pied de page</h3>
+                
+                <div class="form-group">
+                    <label for="footer_about">Texte "À propos de Marie"</label>
+                    <textarea id="footer_about" name="footer_about" rows="4" required>{{ config.footer_about if config.footer_about else 'Passionnée de promenades et d\'aquarelles, je partage mes découvertes parisiennes à travers des carnets de voyage uniques. Chaque visite est une invitation à découvrir la ville sous un angle artistique et personnel.' }}</textarea>
+                    <small>Ce texte apparaît dans la section "À propos de Marie" du pied de page</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="footer_contact_text">Texte de contact</label>
+                    <input type="text" id="footer_contact_text" name="footer_contact_text" value="{{ config.footer_contact_text if config.footer_contact_text else 'Une question, une suggestion ou simplement envie d\'échanger ?' }}" required>
+                    <small>Ce texte apparaît avant le lien de contact</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="footer_contact_email">Email de contact</label>
+                    <input type="email" id="footer_contact_email" name="footer_contact_email" value="{{ config.footer_contact_email if config.footer_contact_email else 'marie@lesvisites.com' }}" required>
+                    <small>Email utilisé pour le lien "Contactez-moi"</small>
+                </div>
+            </div>
+            
+            <div class="about-config-section">
+                <h3>Configuration de la page "À propos"</h3>
+                
+                <div class="form-group">
+                    <label for="about_text">Texte de la page "À propos"</label>
+                    <textarea id="about_text" name="about_text" rows="6" required>{{ config.about_text if config.about_text else 'Passionnée de promenades et d\'aquarelles, je partage mes découvertes parisiennes à travers des carnets de voyage uniques. Chaque visite est une invitation à découvrir la ville sous un angle artistique et personnel.' }}</textarea>
+                    <small>Ce texte apparaît sur la page "À propos" accessible depuis le footer</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="about_image_file">Image de Marie</label>
+                    <input type="file" id="about_image_file" name="about_image_file" accept="image/*" class="file-input">
+                    <small>Formats acceptés : PNG, JPG, JPEG, GIF, WEBP (max 10MB)</small>
+                </div>
+                
+                {% if config.about_image %}
+                <div class="form-group">
+                    <label>Image actuelle</label>
+                    <div class="current-image">
+                        {% if config.about_image.startswith('http') %}
+                            <img src="{{ config.about_image }}" alt="Image actuelle de Marie" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename=config.about_image) }}" alt="Image actuelle de Marie" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="about_image">Ou URL de l'image (optionnel)</label>
+                    <input type="url" id="about_image" name="about_image" value="{{ config.about_image if config.about_image else '' }}" placeholder="https://example.com/photo-marie.jpg">
+                    <small>Alternative : utilisez une URL d'image</small>
+                </div>
+            </div>
+            
+            <div class="menus-section">
+                <h3>Configuration des menus</h3>
+                <p class="menu-help">Gérez les menus de navigation du site. Seul le menu "Carnets de ballades" est actuellement fonctionnel.</p>
+                
+                {% if config.menus %}
+                    {% for menu in config.menus %}
+                        <div class="menu-item">
+                            <div class="menu-header-admin">
+                                <h4>Menu : {{ menu.title }}</h4>
+                                <span class="menu-status {% if menu.active %}active{% else %}inactive{% endif %}">
+                                    {% if menu.active %}✅ Actif{% else %}⏳ En développement{% endif %}
+                                </span>
+                                <div class="menu-actions">
+                                    <button type="button" class="btn-delete-menu" onclick="deleteMenu('{{ menu.id }}')" 
+                                            title="Supprimer ce menu">🗑️</button>
+                                </div>
+                            </div>
+                            
+                            <div class="menu-edit-form">
+                                <div class="form-group">
+                                    <label for="menu_title_{{ menu.id }}">Titre du menu</label>
+                                    <input type="text" id="menu_title_{{ menu.id }}" name="menu_title_{{ menu.id }}" 
+                                           value="{{ menu.title }}" required>
+                                    <small>Ce titre apparaît dans la navigation</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="menu_description_{{ menu.id }}">Description du menu</label>
+                                    <input type="text" id="menu_description_{{ menu.id }}" name="menu_description_{{ menu.id }}" 
+                                           value="{{ menu.description }}" required>
+                                    <small>Cette description apparaît sous le titre dans la navigation</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="menu_active_{{ menu.id }}">Statut du menu</label>
+                                    <select id="menu_active_{{ menu.id }}" name="menu_active_{{ menu.id }}">
+                                        <option value="true" {% if menu.active %}selected{% endif %}>✅ Actif</option>
+                                        <option value="false" {% if not menu.active %}selected{% endif %}>⏳ En développement</option>
+                                    </select>
+                                    <small>Les menus inactifs ne sont pas visibles dans la navigation</small>
+                                </div>
+                            </div>
+                            
+                            {% if menu.id == 'ballades' %}
+                                <div class="menu-page-content">
+                                    <h5>Contenu de la page des ballades :</h5>
+                                    <div class="form-group">
+                                        <label for="ballades_page_title">Titre de la page</label>
+                                        <input type="text" id="ballades_page_title" name="ballades_page_title" 
+                                               value="{{ menu.page_title if menu.page_title else 'Mes Promenades' }}" required>
+                                        <small>Ce titre apparaît sur la page des ballades</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ballades_page_description">Description de la page</label>
+                                        <textarea id="ballades_page_description" name="ballades_page_description" rows="3" required>{{ menu.page_description if menu.page_description else 'Découvrez Paris à travers mes promenades aquarelles. Chaque visite vous emmène dans un quartier unique avec ses histoires et ses secrets.' }}</textarea>
+                                        <small>Cette description apparaît sous le titre de la page</small>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if menu.id == 'cultures' %}
+                                <div class="menu-page-content">
+                                    <h5>Contenu de la page des cultures :</h5>
+                                    <div class="form-group">
+                                        <label for="cultures_page_title">Titre de la page</label>
+                                        <input type="text" id="cultures_page_title" name="cultures_page_title" 
+                                               value="{{ menu.page_title if menu.page_title else 'Carnets de Cultures' }}" required>
+                                        <small>Ce titre apparaît sur la page des cultures</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cultures_page_description">Description de la page</label>
+                                        <textarea id="cultures_page_description" name="cultures_page_description" rows="3" required>{{ menu.page_description if menu.page_description else 'Découvrez mes explorations culturelles et artistiques. Chaque carnet vous emmène dans un univers unique avec ses histoires et ses secrets.' }}</textarea>
+                                        <small>Cette description apparaît sous le titre de la page</small>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- Section pour ajouter un nouveau menu -->
+                <div class="add-menu-section">
+                    <h3>➕ Ajouter un nouveau menu</h3>
+                    <div class="menu-edit-form">
+                        <div class="form-group">
+                            <label for="new_menu_id">Identifiant du menu</label>
+                            <input type="text" id="new_menu_id" name="new_menu_id" placeholder="ex: recettes">
+                            <small>Identifiant unique pour le menu (sans espaces, en minuscules) - Optionnel</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="new_menu_title">Titre du menu</label>
+                            <input type="text" id="new_menu_title" name="new_menu_title" placeholder="ex: Carnets de recettes">
+                            <small>Ce titre apparaît dans la navigation - Optionnel</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="new_menu_description">Description du menu</label>
+                            <input type="text" id="new_menu_description" name="new_menu_description" placeholder="ex: Recettes et cuisine">
+                            <small>Cette description apparaît sous le titre dans la navigation - Optionnel</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="new_menu_active">Statut du menu</label>
+                            <select id="new_menu_active" name="new_menu_active">
+                                <option value="true">✅ Actif</option>
+                                <option value="false" selected>⏳ En développement</option>
+                            </select>
+                            <small>Les menus inactifs ne sont pas visibles dans la navigation</small>
+                        </div>
+                        
+                        <button type="submit" class="btn-add-menu">➕ Ajouter le menu</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-info">
+                <h3>Informations de configuration</h3>
+                <p><strong>Dernière modification :</strong> {{ config.last_updated[:10] }}</p>
+                <p><strong>Fichier de configuration :</strong> data/config.json</p>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Retour au tableau de bord</a>
+                <button type="submit" class="btn">Mettre à jour la configuration</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+    function deleteMenu(menuId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce menu ? Cette action ne peut pas être annulée.')) {
+            // Créer un formulaire temporaire pour envoyer la requête de suppression
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("admin_delete_menu", menu_id="") }}' + menuId;
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    </script>
+{% endblock %} 

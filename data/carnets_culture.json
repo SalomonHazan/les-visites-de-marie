@@ -1,0 +1,122 @@
+{
+  "musees_expositions": [
+    {
+      "id": "visite-louvre-2024",
+      "titre": "Visite du Louvre - Les chefs-d'œuvre",
+      "description_courte": "Une exploration des plus belles œuvres du musée du Louvre",
+      "description_complete": "Découvrez les chefs-d'œuvre du Louvre à travers cette visite guidée. De la Joconde aux sculptures grecques, en passant par les peintures de la Renaissance, chaque œuvre raconte une histoire unique.",
+      "date_creation": "2024-01-15",
+      "image_url": "uploads/carnets_culture/file_baff4fcc.jpg",
+      "categorie": "musees_expositions",
+      "etapes": [
+        {
+          "titre": "La Joconde",
+          "description": "Le célèbre portrait de Mona Lisa par Léonard de Vinci. Découvrez l'histoire mystérieuse de ce tableau et les techniques révolutionnaires utilisées par l'artiste.",
+          "duree": "30 min",
+          "adresse": "Musée du Louvre, 75001 Paris",
+          "metro": "Palais Royal - Musée du Louvre (lignes 1 et 7)"
+        },
+        {
+          "titre": "La Vénus de Milo",
+          "description": "Cette sculpture grecque antique est l'un des symboles de la beauté classique. Admirez la finesse du travail et l'élégance de la pose.",
+          "duree": "20 min",
+          "adresse": "Musée du Louvre, 75001 Paris",
+          "metro": "Palais Royal - Musée du Louvre (lignes 1 et 7)"
+        },
+        {
+          "titre": "Les appartements de Napoléon III",
+          "description": "Plongez dans le luxe du Second Empire en visitant les appartements somptueux de Napoléon III, avec leurs décors dorés et leurs meubles précieux.",
+          "duree": "45 min",
+          "adresse": "Musée du Louvre, 75001 Paris",
+          "metro": "Palais Royal - Musée du Louvre (lignes 1 et 7)"
+        }
+      ],
+      "conseils": [
+        "Réservez votre billet en ligne pour éviter les files d'attente",
+        "Visitez tôt le matin pour éviter la foule",
+        "Prévoyez au moins 3 heures pour cette visite",
+        "N'oubliez pas votre appareil photo (sans flash)"
+      ]
+    }
+  ],
+  "theatre_spectacles": [
+    {
+      "id": "comedie-francaise-2024",
+      "titre": "La Comédie-Française - Temple du théâtre classique",
+      "description_courte": "Découvrez l'histoire et les coulisses de la Comédie-Française",
+      "description_complete": "La Comédie-Française, fondée en 1680, est la plus ancienne troupe de théâtre au monde encore en activité. Découvrez son histoire fascinante, ses traditions et ses plus grandes productions.",
+      "date_creation": "2024-02-20",
+      "image_url": "uploads/carnets_culture/Salle-Richelieu-coll.-Comedie-Francaise1-980x657_dc03f3bf.webp",
+      "categorie": "theatre_spectacles",
+      "etapes": [
+        {
+          "titre": "Le foyer des artistes",
+          "description": "Le cœur historique de la Comédie-Française où les comédiens se préparent avant leurs représentations. Admirez les portraits des plus grands acteurs qui ont foulé ces planches.",
+          "duree": "25 min",
+          "adresse": "Comédie-Française, 1 Place Colette, 75001 Paris",
+          "metro": "Palais Royal - Musée du Louvre (lignes 1 et 7)"
+        },
+        {
+          "titre": "La salle Richelieu",
+          "description": "La salle principale du théâtre, avec ses 862 places et son décor rouge et or. Découvrez l'acoustique exceptionnelle et l'atmosphère unique de ce lieu mythique.",
+          "duree": "30 min",
+          "adresse": "Comédie-Française, 1 Place Colette, 75001 Paris",
+          "metro": "Palais Royal - Musée du Louvre (lignes 1 et 7)"
+        },
+        {
+          "titre": "La bibliothèque-musée",
+          "description": "Conservant plus de 40 000 volumes et objets liés au théâtre, cette bibliothèque retrace l'histoire du théâtre français depuis le XVIIe siècle.",
+          "duree": "20 min",
+          "adresse": "Comédie-Française, 1 Place Colette, 75001 Paris",
+          "metro": "Palais Royal - Musée du Louvre (lignes 1 et 7)"
+        }
+      ],
+      "conseils": [
+        "Réservez vos places de théâtre plusieurs semaines à l'avance",
+        "Habillez-vous élégamment pour respecter la tradition",
+        "Arrivez 30 minutes avant le début du spectacle",
+        "Silence absolu pendant les représentations"
+      ]
+    }
+  ],
+  "litterature": [
+    {
+      "id": "balzac-paris-2024",
+      "titre": "Sur les traces de Balzac à Paris",
+      "description_courte": "Un parcours littéraire dans les lieux qui ont inspiré Honoré de Balzac",
+      "description_complete": "Suivez les pas d'Honoré de Balzac à travers Paris, découvrez les lieux qui ont inspiré ses romans et plongez dans l'univers de la Comédie humaine.",
+      "date_creation": "2024-03-10",
+      "image_url": "uploads/carnets_culture/1200x680_000_par6387262_8a3d1627.jpg",
+      "categorie": "litterature",
+      "etapes": [
+        {
+          "titre": "La maison de Balzac",
+          "description": "La seule demeure parisienne de Balzac encore existante. Découvrez son cabinet de travail et les objets qui l'entouraient pendant qu'il écrivait ses chefs-d'œuvre.",
+          "duree": "40 min",
+          "adresse": "47 rue Raynouard, 75016 Paris",
+          "metro": "Passy (ligne 6)"
+        },
+        {
+          "titre": "Le café de la Paix",
+          "description": "Un des cafés préférés de Balzac, où il aimait observer la société parisienne et trouver l'inspiration pour ses personnages.",
+          "duree": "30 min",
+          "adresse": "5 Place de l'Opéra, 75009 Paris",
+          "metro": "Opéra (lignes 3, 7 et 8)"
+        },
+        {
+          "titre": "La Bibliothèque nationale",
+          "description": "Balzac y passait de longues heures à faire des recherches pour ses romans. Découvrez les salles de lecture historiques.",
+          "duree": "35 min",
+          "adresse": "58 rue de Richelieu, 75002 Paris",
+          "metro": "Bourse (ligne 3)"
+        }
+      ],
+      "conseils": [
+        "Lisez quelques extraits de Balzac avant la visite",
+        "Prévoyez des pauses café pour vous imprégner de l'atmosphère",
+        "Visitez la maison de Balzac le matin pour éviter la foule",
+        "Emportez un carnet pour noter vos impressions"
+      ]
+    }
+  ]
+}
